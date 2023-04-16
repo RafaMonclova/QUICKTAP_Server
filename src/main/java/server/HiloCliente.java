@@ -29,7 +29,7 @@ public class HiloCliente implements Runnable {
 
     Conexion conexion = new Conexion();
 
-    public HiloCliente(Socket clientSocket, List<Thread> clientList) {
+    public HiloCliente(Socket clientSocket) {
         this.socketCliente = clientSocket;
         //this.listaClientes = clientList;
         this.usuario = null;
@@ -66,90 +66,98 @@ public class HiloCliente implements Runnable {
                         String mail = (String) peticion.getData().get(0);
                         String password = (String) peticion.getData().get(1);
 
-                        Usuario usuario = conexion.getUsuario(mail, password);
-                        System.out.println(usuario);
+                        synchronized (this) {
+                            Usuario usuario = conexion.getUsuario(mail, password);
 
-                        //Si no es null, significa que se encontró un usuario con esa combinación de correo y contraseña
-                        if (usuario != null) {
-                            ArrayList<Object> datos = new ArrayList<Object>();
-                            datos.add(true);
-                            datos.add(usuario.getNombre());
-                            Message respuesta = new Message("LOGIN", datos);
-                            out.writeObject(respuesta);
+                            System.out.println(usuario);
 
-                            //Se asigna al cliente el usuario con el que logea
-                            setUsuario(usuario);
+                            //Si no es null, significa que se encontró un usuario con esa combinación de correo y contraseña
+                            if (usuario != null) {
+                                ArrayList<Object> datos = new ArrayList<Object>();
+                                datos.add(true);
+                                datos.add(usuario.getNombre());
+                                Message respuesta = new Message("LOGIN", datos);
+                                out.writeObject(respuesta);
 
-                        } //Si no, es que los datos no son correctos y no se encontró ningún usuario
-                        else {
-                            ArrayList<Object> datos = new ArrayList<Object>();
-                            datos.add(false);
-                            Message respuesta = new Message("LOGIN", datos);
-                            out.writeObject(respuesta);
+                                //Se asigna al cliente el usuario con el que logea
+                                setUsuario(usuario);
+
+                            } //Si no, es que los datos no son correctos y no se encontró ningún usuario
+                            else {
+                                ArrayList<Object> datos = new ArrayList<Object>();
+                                datos.add(false);
+                                Message respuesta = new Message("LOGIN", datos);
+                                out.writeObject(respuesta);
+                            }
                         }
 
                         break;
                     case "ROLE_QUERY":
 
-                        ArrayList<String> roleList = conexion.getRoles();
-                        ArrayList<Object> datos_role_query = new ArrayList<Object>();
-                        datos_role_query.add(roleList);
-                        Message respuesta_role_query = new Message("ROLE_QUERY", datos_role_query);
-                        out.writeObject(respuesta_role_query);
+                        synchronized (this) {
+                            ArrayList<String> roleList = conexion.getRoles();
+                            ArrayList<Object> datos_role_query = new ArrayList<Object>();
+                            datos_role_query.add(roleList);
+                            Message respuesta_role_query = new Message("ROLE_QUERY", datos_role_query);
+                            out.writeObject(respuesta_role_query);
+                        }
 
                         break;
 
                     case "ESTABL_QUERY":
 
-                        ArrayList<String> establList = conexion.getEstablecimientos();
-                        ArrayList<Object> datos_establ_query = new ArrayList<Object>();
-                        datos_establ_query.add(establList);
-                        Message respuesta_establ_query = new Message("ESTABL_QUERY", datos_establ_query);
-                        out.writeObject(respuesta_establ_query);
+                        synchronized (this) {
+                            ArrayList<String> establList = conexion.getEstablecimientos();
+                            ArrayList<Object> datos_establ_query = new ArrayList<Object>();
+                            datos_establ_query.add(establList);
+                            Message respuesta_establ_query = new Message("ESTABL_QUERY", datos_establ_query);
+                            out.writeObject(respuesta_establ_query);
+                        }
 
                         break;
 
                     case "INSERT_USER":
 
-                        //ROLES DEL USUARIO
-                        ArrayList<String> roles = (ArrayList<String>) peticion.getData().get(3);
+                        
+                        synchronized (this) {
+                            //ROLES DEL USUARIO
+                            ArrayList<String> roles = (ArrayList<String>) peticion.getData().get(3);
 
-                        //USUARIO TRABAJADOR O PROPIETARIO
-                        if (roles.get(0).equals("propietario") || roles.get(0).equals("trabajador")) {
-                            
-                            boolean id_usuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3),(ArrayList<String>) peticion.getData().get(4));
+                            //USUARIO TRABAJADOR O PROPIETARIO
+                            if (roles.get(0).equals("propietario") || roles.get(0).equals("trabajador")) {
 
-                            //Ejecución sin errores
-                            if (id_usuario) {
-                                ArrayList<Object> datos_insert = new ArrayList<Object>();
-                                datos_insert.add(true);
-                                Message respuesta_insert = new Message("INSERT_USER", datos_insert);
-                                out.writeObject(respuesta_insert);
-                            } //Si es != 0, significa que ocurrió un error
+                                boolean id_usuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4));
+
+                                //Ejecución sin errores
+                                if (id_usuario) {
+                                    ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                    datos_insert.add(true);
+                                    Message respuesta_insert = new Message("INSERT_USER", datos_insert);
+                                    out.writeObject(respuesta_insert);
+                                } //Si es != 0, significa que ocurrió un error
+                                else {
+                                    ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                    datos_insert.add(false);
+                                    Message respuesta_insert = new Message("INSERT_USER", datos_insert);
+                                    out.writeObject(respuesta_insert);
+                                }
+
+                            } //OTRO USUARIO
                             else {
-                                ArrayList<Object> datos_insert = new ArrayList<Object>();
-                                datos_insert.add(false);
-                                Message respuesta_insert = new Message("INSERT_USER", datos_insert);
-                                out.writeObject(respuesta_insert);
-                            }
-                            
-                        }
-                        //OTRO USUARIO
-                        else {
-                            boolean id_usuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3));
+                                boolean resultadoInsertarUsuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3));
 
-                            //Ejecución sin errores
-                            if (id_usuario) {
-                                ArrayList<Object> datos_insert = new ArrayList<Object>();
-                                datos_insert.add(true);
-                                Message respuesta_insert = new Message("INSERT_USER", datos_insert);
-                                out.writeObject(respuesta_insert);
-                            } //Si es != 0, significa que ocurrió un error
-                            else {
-                                ArrayList<Object> datos_insert = new ArrayList<Object>();
-                                datos_insert.add(false);
-                                Message respuesta_insert = new Message("INSERT_USER", datos_insert);
-                                out.writeObject(respuesta_insert);
+                                //Ejecución sin errores
+                                if (resultadoInsertarUsuario) {
+                                    ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                    datos_insert.add(true);
+                                    Message respuesta_insert = new Message("INSERT_USER", datos_insert);
+                                    out.writeObject(respuesta_insert);
+                                } else {
+                                    ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                    datos_insert.add(false);
+                                    Message respuesta_insert = new Message("INSERT_USER", datos_insert);
+                                    out.writeObject(respuesta_insert);
+                                }
                             }
                         }
 
@@ -157,22 +165,23 @@ public class HiloCliente implements Runnable {
 
                     case "INSERT_ESTABL":
 
-//                        Integer id_establ = conexion.insertEstabl((String)peticion.getData().get(0), (String)peticion.getData().get(1), (String)peticion.getData().get(2));
-//                        
-//                        //Ejecución sin errores
-//                        if(id_establ == 0){
-//                            ArrayList<Object> datos_insert = new ArrayList<Object>();
-//                            datos_insert.add(true);
-//                            Message respuesta_insert = new Message("INSERT_ESTABL",datos_insert);
-//                            out.writeObject(respuesta_insert);
-//                        }
-//                        //Si es != 0, significa que ocurrió un error
-//                        else{
-//                            ArrayList<Object> datos_insert = new ArrayList<Object>();
-//                            datos_insert.add(false);
-//                            Message respuesta_insert = new Message("INSERT_ESTABL",datos_insert);
-//                            out.writeObject(respuesta_insert);
-//                        }
+                        synchronized (this) {
+                            boolean resultadoInsertarEstabl = conexion.insertarEstabl((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2));
+
+                            //Ejecución sin errores
+                            if (resultadoInsertarEstabl) {
+                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                datos_insert.add(true);
+                                Message respuesta_insert = new Message("INSERT_ESTABL", datos_insert);
+                                out.writeObject(respuesta_insert);
+                            } else {
+                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                datos_insert.add(false);
+                                Message respuesta_insert = new Message("INSERT_ESTABL", datos_insert);
+                                out.writeObject(respuesta_insert);
+                            }
+                        }
+
                         break;
 
                 }
@@ -186,7 +195,8 @@ public class HiloCliente implements Runnable {
             } else {
                 System.out.println("Cliente desconectado: " + socketCliente.getInetAddress().getHostAddress());
             }
-            Server.eliminarHiloCliente(Thread.currentThread());
+            //Server.eliminarHiloCliente(Thread.currentThread());
+            Server.eliminarHiloCliente(this);
             Server.mostrarClientesConectados();
             //e.printStackTrace();
         } catch (ClassNotFoundException ex) {

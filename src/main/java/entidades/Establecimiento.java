@@ -5,11 +5,13 @@ package entidades;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -32,10 +34,16 @@ public class Establecimiento  implements Serializable {
     
     @Column(name = "coordenadas")
     private String coordenadas;
-//     private Set ventas = new HashSet(0);
-//     private Set productos = new HashSet(0);
-//     private Set pedidos = new HashSet(0);
-//     private Set usuarios = new HashSet(0);
+    
+    @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Producto> productos = new HashSet<>();
+    
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Venta> ventas = new HashSet();
+    
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Pedido> pedidos = new HashSet();
+
 
     public Establecimiento() {
     }
@@ -76,27 +84,27 @@ public class Establecimiento  implements Serializable {
     public void setCoordenadas(String coordenadas) {
         this.coordenadas = coordenadas;
     }
-//    public Set getVentas() {
-//        return this.ventas;
-//    }
-//    
-//    public void setVentas(Set ventas) {
-//        this.ventas = ventas;
-//    }
-//    public Set getProductos() {
-//        return this.productos;
-//    }
-//    
-//    public void setProductos(Set productos) {
-//        this.productos = productos;
-//    }
-//    public Set getPedidos() {
-//        return this.pedidos;
-//    }
-//    
-//    public void setPedidos(Set pedidos) {
-//        this.pedidos = pedidos;
-//    }
+    public Set getVentas() {
+        return this.ventas;
+    }
+    
+    public void setVentas(Set ventas) {
+        this.ventas = ventas;
+    }
+    public Set getProductos() {
+        return this.productos;
+    }
+    
+    public void setProductos(Set productos) {
+        this.productos = productos;
+    }
+    public Set getPedidos() {
+        return this.pedidos;
+    }
+    
+    public void setPedidos(Set pedidos) {
+        this.pedidos = pedidos;
+    }
 //    public Set getUsuarios() {
 //        return this.usuarios;
 //    }

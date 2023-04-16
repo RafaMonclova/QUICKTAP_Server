@@ -21,6 +21,8 @@ public interface DAO {
     public ArrayList<String> getRoles();
     public ArrayList<String> getEstablecimientos();
     public Set convertRole(ArrayList<String> roles);
+    
+    public boolean insertarEstabl(String nombre, String direccion, String coords);
     public Set convertEstabl(ArrayList<String> establecimientos);
     
 }

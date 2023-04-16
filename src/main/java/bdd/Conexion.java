@@ -37,7 +37,7 @@ import org.hibernate.Transaction;
  */
 public class Conexion implements DAO {
 
-    // Create an EntityManagerFactory when you start the application
+    // Crea un objeto EntityManagerFactory para realizar las conexiones a la base de datos
     private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
             .createEntityManagerFactory("ConexionBD");
 
@@ -45,18 +45,17 @@ public class Conexion implements DAO {
     public Usuario getUsuario(String correo, String passw) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        // the lowercase c refers to the object
-        // :custID is a parameterized query thats value is set below
+        
         String query = "SELECT c FROM Usuario c WHERE c.correo = :correobuscar and c.passw = :passwbuscar";
 
-        // Issue the query and get a matching Customer
+        
         TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
         tq.setParameter("correobuscar", correo);
         tq.setParameter("passwbuscar", passw);
 
         Usuario usuario = null;
         try {
-            // Get matching customer object and output
+            
             usuario = tq.getSingleResult();
             //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
@@ -81,20 +80,50 @@ public class Conexion implements DAO {
             
             usuario.setRols(convertRole(roles));
             
-            tx = em.getTransaction(); // Obtener una instancia de EntityTransaction
-            tx.begin(); // Iniciar una transacción
-            em.persist(usuario); // Persistir el objeto usuario en el EntityManager
-            tx.commit(); // Confirmar la transacción
+            tx = em.getTransaction(); 
+            tx.begin(); 
+            em.persist(usuario); 
+            tx.commit(); 
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
-                tx.rollback(); // Revertir la transacción en caso de error
+                tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
             }
-            // Manejar la excepción adecuadamente
         } finally {
-            em.close(); // Cerrar el EntityManager
+            em.close();
+        }
+        
+        return exito;
+    }
+    
+    @Override
+    public boolean insertarEstabl(String nombre, String direccion, String coords) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+        
+        boolean exito = false;
+        
+        try {
+
+            Establecimiento establecimiento = new Establecimiento(nombre, direccion, coords);
+            
+            
+            tx = em.getTransaction(); 
+            tx.begin(); 
+            em.persist(establecimiento); 
+            tx.commit(); 
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+            }
+            
+        } finally {
+            em.close(); 
         }
         
         return exito;
@@ -115,20 +144,20 @@ public class Conexion implements DAO {
             usuario.setEstablecimientos(convertEstabl(establecimientos));
             
             
-            tx = em.getTransaction(); // Obtener una instancia de EntityTransaction
-            tx.begin(); // Iniciar una transacción
-            em.persist(usuario); // Persistir el objeto usuario en el EntityManager
-            tx.commit(); // Confirmar la transacción
+            tx = em.getTransaction(); 
+            tx.begin(); 
+            em.persist(usuario); 
+            tx.commit(); 
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
-                tx.rollback(); // Revertir la transacción en caso de error
+                tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
             }
-            // Manejar la excepción adecuadamente
+           
         } finally {
-            em.close(); // Cerrar el EntityManager
+            em.close();
         }
         
         return exito;
@@ -141,16 +170,15 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        // the lowercase c refers to the object
-        // :custID is a parameterized query thats value is set below
+        
         String query = "SELECT c FROM Rol c";
 
-        // Issue the query and get a matching Customer
+        
         TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
 
         List<Rol> roles = null;
         try {
-            // Get matching customer object and output
+            
             roles = tq.getResultList();
 
             for (Rol rol : roles) {
@@ -159,7 +187,6 @@ public class Conexion implements DAO {
 
             }
 
-            //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
             //ex.printStackTrace();
         } finally {
@@ -193,7 +220,6 @@ public class Conexion implements DAO {
 
             }
 
-            //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
             //ex.printStackTrace();
         } finally {
@@ -208,19 +234,18 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        // the lowercase c refers to the object
-        // :custID is a parameterized query thats value is set below
+        
         String query = "SELECT c FROM Rol c WHERE c.nombre = :nombrebuscar";
 
-        // Issue the query and get a matching Customer
+        
         TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
         tq.setParameter("nombrebuscar", nombreRol);
 
         Rol rol = null;
         try {
-            // Get matching customer object and output
+            
             rol = tq.getSingleResult();
-            //System.out.println(usuario.getNombre());
+            
         } catch (NoResultException ex) {
             //ex.printStackTrace();
         } finally {

@@ -14,7 +14,7 @@ import java.util.List;
 public class Server {
 
     private static final int PUERTO = 4444;
-    private static List<Thread> listaClientes = new ArrayList<>();
+    private static List<HiloCliente> listaClientes = new ArrayList<>();
 
     public static void main(String[] args) {
         try {
@@ -24,8 +24,9 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress().getHostAddress());
-                Thread hiloCliente = new Thread(new HiloCliente(clientSocket, listaClientes));
-                hiloCliente.start();
+                HiloCliente hiloCliente = new HiloCliente(clientSocket);
+                Thread thread = new Thread(hiloCliente);
+                thread.start();
                 agregarHiloCliente(hiloCliente);
                 mostrarClientesConectados();
             }
@@ -35,12 +36,12 @@ public class Server {
     }
     
     //Agrega un hilo de cliente a la lista
-    public static synchronized void agregarHiloCliente(Thread hiloCliente) {
+    public static synchronized void agregarHiloCliente(HiloCliente hiloCliente) {
         listaClientes.add(hiloCliente);
     }
 
     //Elimina un hilo de cliente de la lista
-    public static synchronized void eliminarHiloCliente(Thread hiloCliente) {
+    public static synchronized void eliminarHiloCliente(HiloCliente hiloCliente) {
         listaClientes.remove(hiloCliente);
     }
     
