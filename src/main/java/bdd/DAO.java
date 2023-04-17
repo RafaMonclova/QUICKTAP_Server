@@ -15,14 +15,22 @@ import java.util.Set;
  */
 public interface DAO {
     
-    public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles);
-    public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles,ArrayList<String> establecimientos);
+    public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles); //Administrador y cliente
+    public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles,ArrayList<String> establecimientos); //Propietario y trabajador
     public Usuario getUsuario(String correo,String passw);
+    public Usuario getUsuario(String nombre);
+    
     public ArrayList<String> getRoles();
     public ArrayList<String> getEstablecimientos();
-    public Set convertRole(ArrayList<String> roles);
+    
+    public Set convertToRoleSet(ArrayList<String> roles);
     
     public boolean insertarEstabl(String nombre, String direccion, String coords);
     public Set convertEstabl(ArrayList<String> establecimientos);
+    
+    public boolean actualizarUsuario(String nombreIdentifica, 
+            String nombre, String correo, String passw, ArrayList<String> roles); //Administrador y cliente
+    public boolean actualizarUsuario(String nombreIdentifica, 
+            String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos); //Propietario y trabajador
     
 }

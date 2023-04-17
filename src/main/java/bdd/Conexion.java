@@ -66,6 +66,31 @@ public class Conexion implements DAO {
 
         return usuario;
     }
+    
+    @Override
+    public Usuario getUsuario(String nombre) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        
+        String query = "SELECT c FROM Usuario c WHERE c.nombre = :nombrebuscar";
+
+        
+        TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+        tq.setParameter("nombrebuscar", nombre);
+
+        Usuario usuario = null;
+        try {
+            
+            usuario = tq.getSingleResult();
+            //System.out.println(usuario.getNombre());
+        } catch (NoResultException ex) {
+            //ex.printStackTrace();
+        } finally {
+            em.close();
+        }
+
+        return usuario;
+    }
 
     @Override
     public boolean insertarUsuario(String nombre, String correo, String passw, ArrayList<String> roles) {
@@ -78,7 +103,7 @@ public class Conexion implements DAO {
 
             Usuario usuario = new Usuario(nombre, correo, passw);
             
-            usuario.setRols(convertRole(roles));
+            usuario.setRols(convertToRoleSet(roles));
             
             tx = em.getTransaction(); 
             tx.begin(); 
@@ -140,7 +165,7 @@ public class Conexion implements DAO {
 
             Usuario usuario = new Usuario(nombre, correo, passw);
             
-            usuario.setRols(convertRole(roles));
+            usuario.setRols(convertToRoleSet(roles));
             usuario.setEstablecimientos(convertEstabl(establecimientos));
             
             
@@ -257,13 +282,16 @@ public class Conexion implements DAO {
     }
 
     @Override
-    public Set convertRole(ArrayList<String> roles) {
+    public Set<Rol> convertToRoleSet(ArrayList<String> roles) {
 
-        Set setRoles = new HashSet();
+        Set<Rol> setRoles = new HashSet();
 
-        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        
 
         for (String r : roles) {
+            
+            EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+            
             String query = "SELECT c FROM Rol c where c.nombre = :nombrerol";
 
             TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
@@ -277,7 +305,7 @@ public class Conexion implements DAO {
                 setRoles.add(rol);
 
             } catch (NoResultException ex) {
-                //ex.printStackTrace();
+                ex.printStackTrace();
             } finally {
                 em.close();
             }
@@ -288,13 +316,16 @@ public class Conexion implements DAO {
     }
     
     @Override
-    public Set convertEstabl(ArrayList<String> establecimientos) {
+    public Set<Establecimiento> convertEstabl(ArrayList<String> establecimientos) {
 
-        Set setEstabl = new HashSet();
+        Set<Establecimiento> setEstabl = new HashSet();
 
-        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        
 
         for (String r : establecimientos) {
+            
+            EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+            
             String query = "SELECT c FROM Establecimiento c where c.nombre = :nombreestabl";
 
             TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
@@ -316,6 +347,99 @@ public class Conexion implements DAO {
 
         return setEstabl;
 
+    }
+
+    @Override
+    public boolean actualizarUsuario(String nombreIdentifica, String nombre, String correo, String passw, ArrayList<String> roles) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        
+        boolean exito = false;
+        
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el usuario por nomnre (nombre único)
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre",Usuario.class);
+            query.setParameter("nombre", nombreIdentifica);
+            Usuario usuario = (Usuario) query.getSingleResult();
+
+            usuario.setNombre(nombre);
+            usuario.setCorreo(correo);
+            usuario.setPassw(passw);
+
+            Set<Rol> setRoles = convertToRoleSet(roles);
+
+            usuario.setRols(setRoles);
+            
+            // Guarda los cambios en la base de datos
+            em.merge(usuario);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Usuario actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback(); 
+                exito = false;
+                e.printStackTrace();
+            }
+           
+        } finally {
+            em.close();
+        }
+        
+        return exito;
+    }
+
+    @Override
+    public boolean actualizarUsuario(String nombreIdentifica, String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+        
+        boolean exito = false;
+        
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el usuario por nomnre (nombre único)
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre",Usuario.class);
+            query.setParameter("nombre", nombreIdentifica);
+            Usuario usuario = (Usuario) query.getSingleResult();
+
+            usuario.setNombre(nombre);
+            usuario.setCorreo(correo);
+            usuario.setPassw(passw);
+            usuario.setRols(convertToRoleSet(roles));
+            usuario.setEstablecimientos(convertEstabl(establecimientos)); //Cambia sus establecimientos
+
+            // Guarda los cambios en la base de datos
+            em.merge(usuario);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Usuario actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback(); 
+                exito = false;
+                e.printStackTrace();
+            }
+           
+        } finally {
+            em.close();
+        }
+        
+        return exito;
     }
 
 }

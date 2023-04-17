@@ -41,8 +41,15 @@ public class Pedido  implements Serializable {
     @JoinColumn(name = "id_trabajador")
     private Usuario trabajadorPrepara;
     
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(name = "participa_pedido",
+        joinColumns = @JoinColumn(name = "id_pedido"),
+        inverseJoinColumns = @JoinColumn(name = "id_cliente"))
     private Set<Usuario> participantes = new HashSet();
+    
+    @ManyToOne
+    @JoinColumn(name = "id_establecimiento")
+    private Establecimiento establecimiento;
      
 
     public Pedido() {

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
@@ -16,12 +18,16 @@ import javax.persistence.Table;
 public class Rol  implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     
     @Column(name = "nombre")
     private String nombre;
      //private Set usuarios = new HashSet(0);
 
+//    @ManyToMany(mappedBy = "rols")
+//    private Set<Usuario> usuarios = new HashSet<>();
     
     public Rol() {
     }
@@ -50,8 +56,16 @@ public class Rol  implements Serializable {
     public String toString(){
         return nombre;
     }
+//
+//    public Set<Usuario> getUsuarios() {
+//        return usuarios;
+//    }
+//
+//    public void setUsuarios(Set<Usuario> usuarios) {
+//        this.usuarios = usuarios;
+//    }
 
-
+    
 
 }
 

@@ -34,15 +34,23 @@ public class LineaPedido implements Serializable{
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Usuario cliente;
+    
+    @Column(name = "cantidad")
+    private int cantidad;
+    
+    @Column(name = "estado")
+    private String estado;
 
     public LineaPedido(){
         
     }
     
-    public LineaPedido(Pedido pedido, Producto producto, Usuario cliente) {
+    public LineaPedido(Pedido pedido, Producto producto, Usuario cliente, int cantidad, String estado) {
         this.pedido = pedido;
         this.producto = producto;
         this.cliente = cliente;
+        this.cantidad = cantidad;
+        this.estado = estado;
     }
 
     public int getId() {
@@ -75,6 +83,22 @@ public class LineaPedido implements Serializable{
 
     public void setCliente(Usuario cliente) {
         this.cliente = cliente;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
     
     

@@ -35,14 +35,14 @@ public class Usuario implements Serializable {
     @Column(name = "passw")
     private String passw;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_rol",
             joinColumns = @JoinColumn(name = "id_usuario"),
             inverseJoinColumns = @JoinColumn(name = "id_rol"))
     private Set<Rol> rols = new HashSet();
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "trabajador_establecimiento",
         joinColumns = @JoinColumn(name = "id_trabajador",columnDefinition = "SELECT ue.id_trabajador FROM trabajador_establecimiento ue " +
@@ -52,7 +52,6 @@ public class Usuario implements Serializable {
         // Consulta personalizada con condición basada en el rol del usuario
             
     )
-    //@Where(clause = "rol_id = 2 OR rol_id = 3") // Condición para filtrar por rol "trabajador"
     private Set<Establecimiento> establecimientos = new HashSet();
 
     public Usuario() {
@@ -96,11 +95,11 @@ public class Usuario implements Serializable {
         this.passw = passw;
     }
 
-    public Set getRols() {
+    public Set<Rol> getRols() {
         return this.rols;
     }
 
-    public void setRols(Set rols) {
+    public void setRols(Set<Rol> rols) {
         this.rols = rols;
     }
 

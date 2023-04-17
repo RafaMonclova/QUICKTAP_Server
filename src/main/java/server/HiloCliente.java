@@ -5,6 +5,8 @@
 package server;
 
 import bdd.Conexion;
+import entidades.Establecimiento;
+import entidades.Rol;
 import entidades.Usuario;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +35,10 @@ public class HiloCliente implements Runnable {
         this.socketCliente = clientSocket;
         //this.listaClientes = clientList;
         this.usuario = null;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
     }
 
     public void setUsuario(Usuario usuario) {
@@ -76,6 +82,15 @@ public class HiloCliente implements Runnable {
                                 ArrayList<Object> datos = new ArrayList<Object>();
                                 datos.add(true);
                                 datos.add(usuario.getNombre());
+                                
+                                ArrayList<String> listaRoles = new ArrayList<>();
+                                
+                                for(Rol r : usuario.getRols()){
+                                    listaRoles.add(r.getNombre());
+                                }
+                                
+                                datos.add(listaRoles);
+                                
                                 Message respuesta = new Message("LOGIN", datos);
                                 out.writeObject(respuesta);
 
@@ -92,6 +107,42 @@ public class HiloCliente implements Runnable {
                         }
 
                         break;
+                    case "LOG_OUT":
+
+                        String usuario_logout = (String) peticion.getData().get(0);
+                        boolean sesion_cerrada = false;
+                        synchronized (this) {
+
+                            for (HiloCliente cliente : Server.getListaClientes()) {
+
+                                if (cliente.getUsuario().getNombre().equals(usuario_logout)) {
+                                    System.out.println(usuario_logout + " ha cerrado sesión");
+                                    setUsuario(null); //El usuario vuelve a ser null, ya que no ha iniciado sesión
+                                    sesion_cerrada = true;
+                                    break;
+                                }
+
+                            }
+
+                            System.out.println(usuario);
+
+                            //Se cierra sesión sin errores
+                            if (sesion_cerrada) {
+                                ArrayList<Object> datos = new ArrayList<Object>();
+                                datos.add(true);
+                                datos.add(usuario_logout);
+                                Message respuesta = new Message("LOG_OUT", datos);
+                                out.writeObject(respuesta);
+
+                            } else {
+                                ArrayList<Object> datos = new ArrayList<Object>();
+                                datos.add(false);
+                                Message respuesta = new Message("LOG_OUT", datos);
+                                out.writeObject(respuesta);
+                            }
+                        }
+
+                        break;
                     case "ROLE_QUERY":
 
                         synchronized (this) {
@@ -100,6 +151,43 @@ public class HiloCliente implements Runnable {
                             datos_role_query.add(roleList);
                             Message respuesta_role_query = new Message("ROLE_QUERY", datos_role_query);
                             out.writeObject(respuesta_role_query);
+                        }
+
+                        break;
+
+                    case "USER_DATA_QUERY":
+                        
+                        synchronized (this) {
+
+                            Usuario usuarioModificar = conexion.getUsuario((String) peticion.getData().get(0));
+                            ArrayList<Object> datos_user_query = new ArrayList<Object>();
+                            datos_user_query.add(usuarioModificar.getNombre());
+                            datos_user_query.add(usuarioModificar.getCorreo());
+                            datos_user_query.add(usuarioModificar.getPassw());
+
+                            ArrayList<String> listaRoles = new ArrayList<String>();
+
+                            for (Rol r : usuarioModificar.getRols()) {
+                                listaRoles.add(r.getNombre());
+                            }
+
+                            datos_user_query.add(listaRoles);
+
+                            //Si contiene el rol propietario o trabajador, tambíen se añaden sus establecimientos
+                            if (listaRoles.contains("propietario") || listaRoles.contains("trabajador")) {
+                                ArrayList<String> listaEstabl = new ArrayList<String>();
+
+                                for (Establecimiento e : usuarioModificar.getEstablecimientos()) {
+                                    listaEstabl.add(e.getNombre());
+                                }
+
+                                datos_user_query.add(listaEstabl);
+                            }
+
+                            System.out.println(usuarioModificar);
+                            Message respuesta_user_query = new Message("USER_DATA_QUERY", datos_user_query);
+                            out.writeObject(respuesta_user_query);
+
                         }
 
                         break;
@@ -124,7 +212,7 @@ public class HiloCliente implements Runnable {
                             ArrayList<String> roles = (ArrayList<String>) peticion.getData().get(3);
 
                             //USUARIO TRABAJADOR O PROPIETARIO
-                            if (roles.get(0).equals("propietario") || roles.get(0).equals("trabajador")) {
+                            if (roles.contains("propietario") || roles.contains("trabajador")) {
 
                                 boolean id_usuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4));
 
@@ -163,6 +251,57 @@ public class HiloCliente implements Runnable {
 
                         break;
 
+                    case "USER_UPDATE":
+
+                        
+                        synchronized (this) {
+
+                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
+                            boolean es_trabajador_prop = false;
+
+                            for (Rol r : usuario.getRols()) {
+                                if (r.getNombre().equals("trabajador") || r.getNombre().equals("propietario")) {
+                                    es_trabajador_prop = true;
+                                    break;
+                                }
+                            }
+
+                            //Si es trabajador o propietario, se llama al método que actualiza sus establecimientos
+                            if (es_trabajador_prop) {
+                                boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4), (ArrayList<String>) peticion.getData().get(5));
+
+                                //Ejecución sin errores
+                                if (resultadoActualizarUsuario) {
+                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                    datos_actualizar.add(true);
+                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                    out.writeObject(respuesta_actualizar);
+                                } else {
+                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                    datos_actualizar.add(false);
+                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                    out.writeObject(respuesta_actualizar);
+                                }
+                            } else {
+                                boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4));
+
+                                //Ejecución sin errores
+                                if (resultadoActualizarUsuario) {
+                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                    datos_actualizar.add(true);
+                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                    out.writeObject(respuesta_actualizar);
+                                } else {
+                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                    datos_actualizar.add(false);
+                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                    out.writeObject(respuesta_actualizar);
+                                }
+                            }
+
+                        }
+
+                        break;
                     case "INSERT_ESTABL":
 
                         synchronized (this) {

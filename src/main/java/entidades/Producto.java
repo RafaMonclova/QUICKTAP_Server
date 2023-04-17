@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -45,6 +46,10 @@ public class Producto  implements Serializable {
             joinColumns = @JoinColumn(name = "id_producto"),
             inverseJoinColumns = @JoinColumn(name = "id_categoria"))
     private Set<Categoria> categorias = new HashSet();
+    
+    @ManyToOne
+    @JoinColumn(name = "id_establecimiento")
+    private Establecimiento establecimiento;
 
     public Producto() {
     }

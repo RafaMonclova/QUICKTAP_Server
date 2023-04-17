@@ -38,10 +38,10 @@ public class Establecimiento  implements Serializable {
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Producto> productos = new HashSet<>();
     
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Venta> ventas = new HashSet();
     
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Pedido> pedidos = new HashSet();
 
 

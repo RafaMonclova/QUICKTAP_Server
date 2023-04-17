@@ -49,4 +49,8 @@ public class Server {
     public static synchronized void mostrarClientesConectados(){
         System.out.println("Num Clientes: "+listaClientes.size());
     }
+    
+    public static synchronized List<HiloCliente> getListaClientes(){
+        return listaClientes;
+    }
 }
