@@ -14,7 +14,10 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -96,6 +99,7 @@ public class HiloCliente implements Runnable {
 
                                 //Se asigna al cliente el usuario con el que logea
                                 setUsuario(usuario);
+                                System.out.println("ok");
 
                             } //Si no, es que los datos no son correctos y no se encontró ningún usuario
                             else {
@@ -141,7 +145,7 @@ public class HiloCliente implements Runnable {
                                 out.writeObject(respuesta);
                             }
                         }
-
+                        break;
                     case "SERVER_DATA_QUERY":
 
                         synchronized (this) {
@@ -149,9 +153,9 @@ public class HiloCliente implements Runnable {
                             ArrayList<Object> datos_server_query = new ArrayList<Object>();
 
                             int nuevosClientes = Server.getNuevosClientes();
-                            LocalDate fechaUltimoAlta = Server.getUltimaFechaAlta();
+                            String ultimoAlta = conexion.getUltimoCliente();
                             datos_server_query.add(nuevosClientes);
-                            datos_server_query.add(fechaUltimoAlta);
+                            datos_server_query.add(ultimoAlta);
 
                             int usuariosConectados = Server.getListaClientes().size();
                             InetAddress localAddress = InetAddress.getLocalHost();
@@ -159,12 +163,12 @@ public class HiloCliente implements Runnable {
                             datos_server_query.add(usuariosConectados);
                             datos_server_query.add(ipServidor);
 
-                            int totalClientes = conexion.getTotalClientes();
-                            LocalDate fechaRecarga = LocalDate.now();
+                            long totalClientes = conexion.getTotalClientes();
+                            String fechaRecarga = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
                             datos_server_query.add(totalClientes);
                             datos_server_query.add(fechaRecarga);
 
-                            int numExcepciones = conexion.getExcepciones();
+                            int numExcepciones = conexion.getExcepciones().size();
                             datos_server_query.add(numExcepciones);
                             
                             Message respuesta_server_query = new Message("SERVER_DATA_QUERY", datos_server_query);
@@ -172,8 +176,58 @@ public class HiloCliente implements Runnable {
                         }
 
                         break;    
+                        
+                    case "ESTABL_DATA_QUERY":
 
-                        break;
+                        synchronized (this) {
+                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
+                            
+                            ArrayList<Object> datos_establ_query = new ArrayList<Object>();
+                            
+                            double cajaHoy = 0;
+                            for(Establecimiento e : usuario.getEstablecimientos()){
+                                cajaHoy += conexion.getCajaHoy(e.getNombre());
+                            }
+     
+                            datos_establ_query.add(cajaHoy);
+                            
+                            //Comprueba qué usuarios de los establecimientos están conectados al servidor
+                            int trabajadoresConectados = 0;
+                            for(Usuario u : conexion.getUsuarios(usuario.getEstablecimientos())){
+                                
+                                for(HiloCliente h : Server.getListaClientes()){
+                                    
+                                    if(u.getNombre().equals(h.getUsuario().getNombre())){
+                                        
+                                        trabajadoresConectados++;
+                                        
+                                    }
+                                    
+                                }
+                                
+                            }
+
+                            
+                            datos_establ_query.add(trabajadoresConectados);
+
+                            long totalTrabajadores = conexion.getUsuarios(usuario.getEstablecimientos()).size();
+                            String fechaRecarga = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+                            datos_establ_query.add(totalTrabajadores);
+                            datos_establ_query.add(fechaRecarga);
+
+                            long totalPedidos = conexion.getNumPedidos("TODOS");
+                            datos_establ_query.add(totalPedidos);
+                            long pedidosFin = 1;//conexion.getNumPedidos("FINALIZADOS");
+                            datos_establ_query.add(pedidosFin);
+                            long pedidosPen = 1;//conexion.getNumPedidos("PENDIENTES");
+                            datos_establ_query.add(pedidosPen);
+                            
+                            Message respuesta_establ_query = new Message("ESTABL_DATA_QUERY", datos_establ_query);
+                            out.writeObject(respuesta_establ_query);
+                        }
+
+                        break;     
+
                     case "ROLE_QUERY":
 
                         synchronized (this) {
@@ -347,7 +401,6 @@ public class HiloCliente implements Runnable {
                                 out.writeObject(respuesta_insert);
 
                                 Server.añadirNuevoCliente(); //Se incrementa el contador con los nuevos clientes registrados del día
-                                Server.setUltimaFechaAlta(LocalDate.now()); //Establece la fecha del último alta
 
                             } else {
                                 ArrayList<Object> datos_insert = new ArrayList<Object>();

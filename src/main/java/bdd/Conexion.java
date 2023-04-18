@@ -7,10 +7,16 @@ package bdd;
 import entidades.Establecimiento;
 import entidades.Rol;
 import entidades.Usuario;
+import entidades.Venta;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,37 +47,76 @@ public class Conexion implements DAO {
     private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
             .createEntityManagerFactory("ConexionBD");
 
-    private List<Exception> excepciones = new ArrayList<>();     
+    private List<Exception> excepciones = new ArrayList<>();
 
-    public List<Exception> getExcepciones(){
+    public String getHora() {
+
+        return ZonedDateTime.now()
+                .format(DateTimeFormatter.ofPattern("hh:mm:ss"));
+
+    }
+
+    public List<Exception> getExcepciones() {
         return excepciones;
     }
 
-    public void addExcepcion(Exception e){
+    public void addExcepcion(Exception e) {
         excepciones.add(e);
 
         PrintWriter pw = null;
-        
 
-        //ESCRITURA FICHERO
+        try {
+            pw = new PrintWriter(new FileWriter("error_log.log", true));
+
+            pw.println("[" + getHora() + "]" + e.getMessage());
+
+        } catch (IOException ex) {
+            Logger.getLogger(Conexion.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            pw.close();
+        }
     }
 
-
     @Override
-    public int getTotalClientes(){
+    public long getTotalClientes() {
 
-        int numUsuarios = 0;
+        long numUsuarios = 0;
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        String query = "SELECT COUNT(u) FROM Usuario u";
+        String jpql = "SELECT COUNT(u) FROM Usuario u";
 
-        Query query = em.createQuery(jpql);
+        Query query = (Query) em.createQuery(jpql);
 
-        numUsuarios = (int) query.getSingleResult();
+        numUsuarios = (long) query.getSingleResult();
 
         return numUsuarios;
-        
+
+    }
+
+    //Devuelve la fecha del último registro añadido en la tabla establecimiento
+    @Override
+    public String getUltimoCliente() {
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT e FROM Establecimiento e ORDER BY e.id DESC";
+
+        TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
+        tq.setMaxResults(1); //Devuelve el primer registro, que es el último id
+
+        Establecimiento establ = null;
+        try {
+
+            establ = tq.getSingleResult();
+            //System.out.println(usuario.getNombre());
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return establ.getNombre();
 
     }
 
@@ -79,17 +124,15 @@ public class Conexion implements DAO {
     public Usuario getUsuario(String correo, String passw) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        
         String query = "SELECT c FROM Usuario c WHERE c.correo = :correobuscar and c.passw = :passwbuscar";
 
-        
         TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
         tq.setParameter("correobuscar", correo);
         tq.setParameter("passwbuscar", passw);
 
         Usuario usuario = null;
         try {
-            
+
             usuario = tq.getSingleResult();
             //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
@@ -100,21 +143,19 @@ public class Conexion implements DAO {
 
         return usuario;
     }
-    
+
     @Override
     public Usuario getUsuario(String nombre) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        
         String query = "SELECT c FROM Usuario c WHERE c.nombre = :nombrebuscar";
 
-        
         TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
         tq.setParameter("nombrebuscar", nombre);
 
         Usuario usuario = null;
         try {
-            
+
             usuario = tq.getSingleResult();
             //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
@@ -130,50 +171,19 @@ public class Conexion implements DAO {
     public boolean insertarUsuario(String nombre, String correo, String passw, ArrayList<String> roles) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
         EntityTransaction tx = null;
-        
+
         boolean exito = false;
-        
+
         try {
 
             Usuario usuario = new Usuario(nombre, correo, passw);
-            
-            usuario.setRols(convertToRoleSet(roles));
-            
-            tx = em.getTransaction(); 
-            tx.begin(); 
-            em.persist(usuario); 
-            tx.commit(); 
-            exito = true;
-        } catch (Exception e) {
-            if (tx != null && tx.isActive()) {
-                tx.rollback(); 
-                exito = false;
-                e.printStackTrace();
-                addExcepcion(e);
-            }
-        } finally {
-            em.close();
-        }
-        
-        return exito;
-    }
-    
-    @Override
-    public boolean insertarEstabl(String nombre, String direccion, String coords) {
-        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
-        EntityTransaction tx = null;
-        
-        boolean exito = false;
-        
-        try {
 
-            Establecimiento establecimiento = new Establecimiento(nombre, direccion, coords);
-            
-            
-            tx = em.getTransaction(); 
-            tx.begin(); 
-            em.persist(establecimiento); 
-            tx.commit(); 
+            usuario.setRols(convertToRoleSet(roles));
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(usuario);
+            tx.commit();
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
@@ -182,46 +192,75 @@ public class Conexion implements DAO {
                 e.printStackTrace();
                 addExcepcion(e);
             }
-            
         } finally {
-            em.close(); 
+            em.close();
         }
-        
+
         return exito;
     }
-    
+
     @Override
-    public boolean insertarUsuario(String nombre, String correo, String passw, ArrayList<String> roles,ArrayList<String> establecimientos) {
+    public boolean insertarEstabl(String nombre, String direccion, String coords) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
         EntityTransaction tx = null;
-        
+
         boolean exito = false;
-        
+
         try {
 
-            Usuario usuario = new Usuario(nombre, correo, passw);
-            
-            usuario.setRols(convertToRoleSet(roles));
-            usuario.setEstablecimientos(convertEstabl(establecimientos));
-            
-            
-            tx = em.getTransaction(); 
-            tx.begin(); 
-            em.persist(usuario); 
-            tx.commit(); 
+            Establecimiento establecimiento = new Establecimiento(nombre, direccion, coords);
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(establecimiento);
+            tx.commit();
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
-                tx.rollback(); 
+                tx.rollback();
                 exito = false;
                 e.printStackTrace();
                 addExcepcion(e);
             }
-           
+
         } finally {
             em.close();
         }
-        
+
+        return exito;
+    }
+
+    @Override
+    public boolean insertarUsuario(String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            Usuario usuario = new Usuario(nombre, correo, passw);
+
+            usuario.setRols(convertToRoleSet(roles));
+            usuario.setEstablecimientos(convertEstabl(establecimientos));
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(usuario);
+            tx.commit();
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
         return exito;
     }
 
@@ -232,15 +271,13 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        
         String query = "SELECT c FROM Rol c";
 
-        
         TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
 
         List<Rol> roles = null;
         try {
-            
+
             roles = tq.getResultList();
 
             for (Rol rol : roles) {
@@ -258,7 +295,7 @@ public class Conexion implements DAO {
         return listaRoles;
 
     }
-    
+
     @Override
     public ArrayList<String> getEstablecimientos() {
 
@@ -266,14 +303,13 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        
         String query = "SELECT c FROM Establecimiento c";
 
         TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
 
         List<Establecimiento> establecimientos = null;
         try {
-            
+
             establecimientos = tq.getResultList();
 
             for (Establecimiento e : establecimientos) {
@@ -296,18 +332,16 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        
         String query = "SELECT c FROM Rol c WHERE c.nombre = :nombrebuscar";
 
-        
         TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
         tq.setParameter("nombrebuscar", nombreRol);
 
         Rol rol = null;
         try {
-            
+
             rol = tq.getSingleResult();
-            
+
         } catch (NoResultException ex) {
             addExcepcion(ex);
         } finally {
@@ -323,20 +357,18 @@ public class Conexion implements DAO {
 
         Set<Rol> setRoles = new HashSet();
 
-        
-
         for (String r : roles) {
-            
+
             EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
-            
+
             String query = "SELECT c FROM Rol c where c.nombre = :nombrerol";
 
             TypedQuery<Rol> tq = em.createQuery(query, Rol.class);
             tq.setParameter("nombrerol", r);
-            
+
             Rol rol = null;
             try {
-                
+
                 rol = tq.getSingleResult();
 
                 setRoles.add(rol);
@@ -352,26 +384,24 @@ public class Conexion implements DAO {
         return setRoles;
 
     }
-    
+
     @Override
     public Set<Establecimiento> convertEstabl(ArrayList<String> establecimientos) {
 
         Set<Establecimiento> setEstabl = new HashSet();
 
-        
-
         for (String r : establecimientos) {
-            
+
             EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
-            
+
             String query = "SELECT c FROM Establecimiento c where c.nombre = :nombreestabl";
 
             TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
             tq.setParameter("nombreestabl", r);
-            
+
             Establecimiento establecimiento = null;
             try {
-                
+
                 establecimiento = tq.getSingleResult();
 
                 setEstabl.add(establecimiento);
@@ -392,16 +422,15 @@ public class Conexion implements DAO {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
         EntityTransaction tx = null;
 
-        
         boolean exito = false;
-        
+
         try {
 
             // Iniciar la transacción
             em.getTransaction().begin();
 
             // Obtiene el usuario por nomnre (nombre único)
-            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre",Usuario.class);
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre", Usuario.class);
             query.setParameter("nombre", nombreIdentifica);
             Usuario usuario = (Usuario) query.getSingleResult();
 
@@ -412,7 +441,7 @@ public class Conexion implements DAO {
             Set<Rol> setRoles = convertToRoleSet(roles);
 
             usuario.setRols(setRoles);
-            
+
             // Guarda los cambios en la base de datos
             em.merge(usuario);
 
@@ -423,16 +452,16 @@ public class Conexion implements DAO {
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
-                tx.rollback(); 
+                tx.rollback();
                 exito = false;
                 e.printStackTrace();
                 addExcepcion(e);
             }
-           
+
         } finally {
             em.close();
         }
-        
+
         return exito;
     }
 
@@ -440,16 +469,16 @@ public class Conexion implements DAO {
     public boolean actualizarUsuario(String nombreIdentifica, String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
         EntityTransaction tx = null;
-        
+
         boolean exito = false;
-        
+
         try {
 
             // Iniciar la transacción
             em.getTransaction().begin();
 
             // Obtiene el usuario por nomnre (nombre único)
-            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre",Usuario.class);
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre", Usuario.class);
             query.setParameter("nombre", nombreIdentifica);
             Usuario usuario = (Usuario) query.getSingleResult();
 
@@ -469,17 +498,116 @@ public class Conexion implements DAO {
             exito = true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
-                tx.rollback(); 
+                tx.rollback();
                 exito = false;
                 e.printStackTrace();
                 addExcepcion(e);
             }
-           
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+    }
+
+    @Override
+    public double getCajaHoy(String establecimiento) {
+
+        double cajaHoy = 0;
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String jpql = "SELECT SUM(lp.cantidad * p.precio) AS precio_total\n"
+                + "FROM LineaPedido lp\n"
+                + "JOIN lp.producto p\n"
+                + "JOIN lp.pedido pe\n"
+                + "JOIN pe.establecimiento e\n"
+                + "WHERE pe.fecha = CURRENT_DATE and e.nombre = :nombreestabl";
+
+        Query query = (Query) em.createQuery(jpql);
+        query.setParameter("nombreestabl", establecimiento);
+        try {
+            cajaHoy = (double) query.getSingleResult();
+        }catch (NoResultException ex) {
+            addExcepcion(ex);
         } finally {
             em.close();
         }
         
-        return exito;
+        
+
+        return cajaHoy;
+
+    }
+
+    @Override
+    public ArrayList<Usuario> getUsuarios(Set<Establecimiento> establecimientos) {
+
+        ArrayList<Usuario> listaUsuarios = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT DISTINCT u " +
+                        "FROM Usuario u " +
+                        "JOIN u.establecimientos e " +
+                        "WHERE e IN :establecimientos";
+        
+        
+
+        TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+        tq.setParameter("establecimientos", establecimientos);
+
+        List<Usuario> usuarios = null;
+        try {
+
+            usuarios = tq.getResultList();
+            listaUsuarios.addAll(usuarios);
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaUsuarios;
+
+    }
+
+    @Override
+    public long getNumPedidos(String estado) {
+
+        long totalPedidos = 0;
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String jpql = "";
+
+        switch (estado) {
+
+            case "TODOS":
+                jpql = "SELECT COUNT(p) FROM Pedido p";
+                break;
+            case "FINALIZADOS":
+                jpql = "SELECT COUNT(p) FROM Pedido p WHERE NOT EXISTS (\n"
+                        + "  SELECT lp FROM LineaPedido lp WHERE lp.pedido = p AND lp.estado <> 'finalizado'\n"
+                        + ")";
+                break;
+            case "PENDIENTES":
+                jpql = "SELECT COUNT(p) FROM Pedido p WHERE NOT EXISTS (\n"
+                        + "  SELECT lp FROM LineaPedido lp WHERE lp.pedido = p AND lp.estado <> 'pendiente'\n"
+                        + ")";
+                
+                break;
+
+        }
+
+        Query query = (Query) em.createQuery(jpql);
+
+        totalPedidos = (long) query.getSingleResult();
+
+        return totalPedidos;
+
     }
 
 }

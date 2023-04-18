@@ -8,8 +8,12 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
 
 public class Server {
 
@@ -19,7 +23,6 @@ public class Server {
     Map<HiloCliente, List<Exception>> exceptionsMap = new HashMap<>();
 
     private static int contadorNuevosClientes = 0;
-    private static LocalDate fechaUltimoAlta = null;
 
     public static void main(String[] args) {
         try {
@@ -27,8 +30,8 @@ public class Server {
             System.out.println("Servidor iniciado en el puerto " + PUERTO);
 
             //Inicializa la tarea de comprobación, que reiniciará el contador de nuevos clientes a las 0:00
-            CounterResetApp app = new CounterResetApp();
-            app.startCounterResetTask();
+            
+            startCounterResetTask();
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -74,18 +77,8 @@ public class Server {
         contadorNuevosClientes++;
     }
 
-    //Devuelve la fecha del último alta de cliente
-    public static synchronized LocalDate getUltimaFechaAlta(){
-        return fechaUltimoAlta;
-    }
-
-    //Establece la nueva fecha de último alta de cliente
-    public static synchronized void setUltimaFechaAlta(LocalDate fecha){
-        fechaUltimoAlta = fecha;
-    }
-
     //Ejecuta la tarea de comprobación cada minuto
-    private void startCounterResetTask() {
+    private static void startCounterResetTask() {
         CounterResetTask task = new CounterResetTask();
 
         // Programar la tarea para que se ejecute cada minuto

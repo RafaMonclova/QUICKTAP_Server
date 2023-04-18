@@ -5,6 +5,7 @@
 package bdd;
 
 
+import entidades.Establecimiento;
 import entidades.Usuario;
 import java.util.ArrayList;
 import java.util.Set;
@@ -15,7 +16,8 @@ import java.util.Set;
  */
 public interface DAO {
     
-    public int getTotalClientes();
+    public long getTotalClientes();
+    public String getUltimoCliente();
 
     public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles); //Administrador y cliente
     public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles,ArrayList<String> establecimientos); //Propietario y trabajador
@@ -34,5 +36,9 @@ public interface DAO {
             String nombre, String correo, String passw, ArrayList<String> roles); //Administrador y cliente
     public boolean actualizarUsuario(String nombreIdentifica, 
             String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos); //Propietario y trabajador
+    
+    public double getCajaHoy(String establecimiento);
+    public ArrayList<Usuario> getUsuarios(Set<Establecimiento> establecimientos); //Devuelve una lista con los usuarios que forman parte de los establecimientos dados
+    public long getNumPedidos(String estado);
     
 }
