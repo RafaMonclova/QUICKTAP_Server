@@ -15,6 +15,8 @@ import java.util.Set;
  */
 public interface DAO {
     
+    public int getTotalClientes();
+
     public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles); //Administrador y cliente
     public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles,ArrayList<String> establecimientos); //Propietario y trabajador
     public Usuario getUsuario(String correo,String passw);

@@ -15,11 +15,20 @@ public class Server {
 
     private static final int PUERTO = 4444;
     private static List<HiloCliente> listaClientes = new ArrayList<>();
+    
+    Map<HiloCliente, List<Exception>> exceptionsMap = new HashMap<>();
+
+    private static int contadorNuevosClientes = 0;
+    private static LocalDate fechaUltimoAlta = null;
 
     public static void main(String[] args) {
         try {
             ServerSocket serverSocket = new ServerSocket(PUERTO);
             System.out.println("Servidor iniciado en el puerto " + PUERTO);
+
+            //Inicializa la tarea de comprobación, que reiniciará el contador de nuevos clientes a las 0:00
+            CounterResetApp app = new CounterResetApp();
+            app.startCounterResetTask();
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -50,7 +59,37 @@ public class Server {
         System.out.println("Num Clientes: "+listaClientes.size());
     }
     
+    //Devuelve el listado de hilos de clientes activos
     public static synchronized List<HiloCliente> getListaClientes(){
         return listaClientes;
+    }
+
+    //Devuelve el contador de clientes nuevos
+    public static synchronized int getNuevosClientes(){
+        return contadorNuevosClientes;
+    }
+
+    //Incrementa el contador de clientes nuevos
+    public static synchronized void añadirNuevoCliente(){
+        contadorNuevosClientes++;
+    }
+
+    //Devuelve la fecha del último alta de cliente
+    public static synchronized LocalDate getUltimaFechaAlta(){
+        return fechaUltimoAlta;
+    }
+
+    //Establece la nueva fecha de último alta de cliente
+    public static synchronized void setUltimaFechaAlta(LocalDate fecha){
+        fechaUltimoAlta = fecha;
+    }
+
+    //Ejecuta la tarea de comprobación cada minuto
+    private void startCounterResetTask() {
+        CounterResetTask task = new CounterResetTask();
+
+        // Programar la tarea para que se ejecute cada minuto
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(task, 0, 60 * 1000);
     }
 }

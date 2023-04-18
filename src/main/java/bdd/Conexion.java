@@ -41,6 +41,40 @@ public class Conexion implements DAO {
     private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
             .createEntityManagerFactory("ConexionBD");
 
+    private List<Exception> excepciones = new ArrayList<>();     
+
+    public List<Exception> getExcepciones(){
+        return excepciones;
+    }
+
+    public void addExcepcion(Exception e){
+        excepciones.add(e);
+
+        PrintWriter pw = null;
+        
+
+        //ESCRITURA FICHERO
+    }
+
+
+    @Override
+    public int getTotalClientes(){
+
+        int numUsuarios = 0;
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT COUNT(u) FROM Usuario u";
+
+        Query query = em.createQuery(jpql);
+
+        numUsuarios = (int) query.getSingleResult();
+
+        return numUsuarios;
+        
+
+    }
+
     @Override
     public Usuario getUsuario(String correo, String passw) {
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
@@ -59,7 +93,7 @@ public class Conexion implements DAO {
             usuario = tq.getSingleResult();
             //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
-            //ex.printStackTrace();
+            addExcepcion(ex);
         } finally {
             em.close();
         }
@@ -84,7 +118,7 @@ public class Conexion implements DAO {
             usuario = tq.getSingleResult();
             //System.out.println(usuario.getNombre());
         } catch (NoResultException ex) {
-            //ex.printStackTrace();
+            addExcepcion(ex);
         } finally {
             em.close();
         }
@@ -115,6 +149,7 @@ public class Conexion implements DAO {
                 tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
+                addExcepcion(e);
             }
         } finally {
             em.close();
@@ -145,6 +180,7 @@ public class Conexion implements DAO {
                 tx.rollback();
                 exito = false;
                 e.printStackTrace();
+                addExcepcion(e);
             }
             
         } finally {
@@ -179,6 +215,7 @@ public class Conexion implements DAO {
                 tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
+                addExcepcion(e);
             }
            
         } finally {
@@ -213,7 +250,7 @@ public class Conexion implements DAO {
             }
 
         } catch (NoResultException ex) {
-            //ex.printStackTrace();
+            addExcepcion(ex);
         } finally {
             em.close();
         }
@@ -246,7 +283,7 @@ public class Conexion implements DAO {
             }
 
         } catch (NoResultException ex) {
-            //ex.printStackTrace();
+            addExcepcion(ex);
         } finally {
             em.close();
         }
@@ -272,7 +309,7 @@ public class Conexion implements DAO {
             rol = tq.getSingleResult();
             
         } catch (NoResultException ex) {
-            //ex.printStackTrace();
+            addExcepcion(ex);
         } finally {
             em.close();
         }
@@ -306,6 +343,7 @@ public class Conexion implements DAO {
 
             } catch (NoResultException ex) {
                 ex.printStackTrace();
+                addExcepcion(ex);
             } finally {
                 em.close();
             }
@@ -339,7 +377,7 @@ public class Conexion implements DAO {
                 setEstabl.add(establecimiento);
 
             } catch (NoResultException ex) {
-                //ex.printStackTrace();
+                addExcepcion(ex);
             } finally {
                 em.close();
             }
@@ -388,6 +426,7 @@ public class Conexion implements DAO {
                 tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
+                addExcepcion(e);
             }
            
         } finally {
@@ -433,6 +472,7 @@ public class Conexion implements DAO {
                 tx.rollback(); 
                 exito = false;
                 e.printStackTrace();
+                addExcepcion(e);
             }
            
         } finally {

@@ -26,14 +26,14 @@ import message.Message;
 public class HiloCliente implements Runnable {
 
     private Socket socketCliente;
-    //private List<Thread> listaClientes;
     private Usuario usuario;
+    
+
 
     Conexion conexion = new Conexion();
 
     public HiloCliente(Socket clientSocket) {
         this.socketCliente = clientSocket;
-        //this.listaClientes = clientList;
         this.usuario = null;
     }
 
@@ -141,6 +141,37 @@ public class HiloCliente implements Runnable {
                                 out.writeObject(respuesta);
                             }
                         }
+
+                    case "SERVER_DATA_QUERY":
+
+                        synchronized (this) {
+                            
+                            ArrayList<Object> datos_server_query = new ArrayList<Object>();
+
+                            int nuevosClientes = Server.getNuevosClientes();
+                            LocalDate fechaUltimoAlta = Server.getUltimaFechaAlta();
+                            datos_server_query.add(nuevosClientes);
+                            datos_server_query.add(fechaUltimoAlta);
+
+                            int usuariosConectados = Server.getListaClientes().size();
+                            InetAddress localAddress = InetAddress.getLocalHost();
+                            String ipServidor = localAddress.getHostAddress();
+                            datos_server_query.add(usuariosConectados);
+                            datos_server_query.add(ipServidor);
+
+                            int totalClientes = conexion.getTotalClientes();
+                            LocalDate fechaRecarga = LocalDate.now();
+                            datos_server_query.add(totalClientes);
+                            datos_server_query.add(fechaRecarga);
+
+                            int numExcepciones = conexion.getExcepciones();
+                            datos_server_query.add(numExcepciones);
+                            
+                            Message respuesta_server_query = new Message("SERVER_DATA_QUERY", datos_server_query);
+                            out.writeObject(respuesta_server_query);
+                        }
+
+                        break;    
 
                         break;
                     case "ROLE_QUERY":
@@ -305,6 +336,7 @@ public class HiloCliente implements Runnable {
                     case "INSERT_ESTABL":
 
                         synchronized (this) {
+
                             boolean resultadoInsertarEstabl = conexion.insertarEstabl((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2));
 
                             //Ejecución sin errores
@@ -313,6 +345,10 @@ public class HiloCliente implements Runnable {
                                 datos_insert.add(true);
                                 Message respuesta_insert = new Message("INSERT_ESTABL", datos_insert);
                                 out.writeObject(respuesta_insert);
+
+                                Server.añadirNuevoCliente(); //Se incrementa el contador con los nuevos clientes registrados del día
+                                Server.setUltimaFechaAlta(LocalDate.now()); //Establece la fecha del último alta
+
                             } else {
                                 ArrayList<Object> datos_insert = new ArrayList<Object>();
                                 datos_insert.add(false);
