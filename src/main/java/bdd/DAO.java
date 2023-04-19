@@ -27,6 +27,8 @@ public interface DAO {
     public ArrayList<String> getRoles();
     public ArrayList<String> getEstablecimientos();
     
+    public ArrayList<Usuario> getUsuarios(String rol);
+    
     public Set convertToRoleSet(ArrayList<String> roles);
     
     public boolean insertarEstabl(String nombre, String direccion, String coords);
@@ -36,6 +38,12 @@ public interface DAO {
             String nombre, String correo, String passw, ArrayList<String> roles); //Administrador y cliente
     public boolean actualizarUsuario(String nombreIdentifica, 
             String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos); //Propietario y trabajador
+    
+    public boolean actualizarUsuario(String nombreIdentifica, 
+            String nombre, String correo, String passw);
+    
+    public boolean actualizarUsuario(String nombreIdentifica, 
+            ArrayList<String> roles,ArrayList<String> establecimientos);
     
     public double getCajaHoy(String establecimiento);
     public ArrayList<Usuario> getUsuarios(Set<Establecimiento> establecimientos); //Devuelve una lista con los usuarios que forman parte de los establecimientos dados

@@ -1,0 +1,5 @@
+[12:59:00]No entity found for query
+[01:01:16]No entity found for query
+[02:16:55]No entity found for query
+[02:35:23]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[02:38:27]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null

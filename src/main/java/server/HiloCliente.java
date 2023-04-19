@@ -186,6 +186,7 @@ public class HiloCliente implements Runnable {
                             
                             double cajaHoy = 0;
                             for(Establecimiento e : usuario.getEstablecimientos()){
+                                System.out.println(e.getNombre());
                                 cajaHoy += conexion.getCajaHoy(e.getNombre());
                             }
      
@@ -288,6 +289,79 @@ public class HiloCliente implements Runnable {
                         }
 
                         break;
+                        
+                    case "EDIT_ROLE_ESTABL_QUERY":
+
+                        synchronized (this) {
+                            
+                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
+                            
+                            ArrayList<String> establList = conexion.getEstablecimientos();
+                            ArrayList<String> roleList = conexion.getRoles();
+                            
+                            ArrayList<String> establUsuario = new ArrayList<>();
+                            for(Establecimiento e : usuario.getEstablecimientos()){
+                                establUsuario.add(e.getNombre());
+                            }
+                            ArrayList<String> rolesUsuario = new ArrayList<>();
+                            for(Rol r : usuario.getRols()){
+                                rolesUsuario.add(r.getNombre());
+                            }
+                            
+                            ArrayList<Object> datos_edit_query = new ArrayList<Object>();
+                            datos_edit_query.add(establList);
+                            datos_edit_query.add(roleList);
+                            datos_edit_query.add(establUsuario);
+                            datos_edit_query.add(rolesUsuario);
+                            Message respuesta_edit_query = new Message("EDIT_ROLE_ESTABL_QUERY", datos_edit_query);
+                            out.writeObject(respuesta_edit_query);
+                        }
+
+                        break;    
+                        
+                    case "PROP_QUERY":
+
+                        synchronized (this) {
+                            ArrayList<Usuario> propList = conexion.getUsuarios("propietario");
+                            
+                            //Lista de "usuarios"
+                            ArrayList<Object> datos_prop_query = new ArrayList<Object>();
+                            
+                            //Recorre la lista de usuarios de la base de datos
+                            //Por cada usuario, se crea una lista para añadir sus campos, y se añade a la lista inicial que se envía
+                            //al cliente.
+                            for(Usuario u : propList){
+                                
+                                ArrayList<Object> camposUsuario = new ArrayList<>();
+                                camposUsuario.add(u.getNombre());
+                                camposUsuario.add(u.getCorreo());
+                                camposUsuario.add(u.getPassw());
+                                
+                                ArrayList<String> rolesUsuario = new ArrayList<>();
+                                
+                                for (Rol r : u.getRols()) {
+                                    rolesUsuario.add(r.getNombre());
+                                }
+                                
+                                camposUsuario.add(rolesUsuario);
+                                
+                                ArrayList<String> establUsuario = new ArrayList<>();
+                                
+                                for (Establecimiento e : u.getEstablecimientos()) {
+                                    establUsuario.add(e.getNombre());
+                                }
+                                
+                                camposUsuario.add(establUsuario);
+                                
+                                datos_prop_query.add(camposUsuario);
+                                
+                            }
+                            
+                            Message respuesta_prop_query = new Message("PROP_QUERY", datos_prop_query);
+                            out.writeObject(respuesta_prop_query);
+                        }
+
+                        break;    
 
                     case "INSERT_USER":
 
@@ -342,51 +416,65 @@ public class HiloCliente implements Runnable {
                         synchronized (this) {
 
                             Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
-                            boolean es_trabajador_prop = false;
+//                            boolean es_trabajador_prop = false;
+//
+//                            for (Rol r : usuario.getRols()) {
+//                                if (r.getNombre().equals("trabajador") || r.getNombre().equals("propietario")) {
+//                                    es_trabajador_prop = true;
+//                                    break;
+//                                }
+//                            }
 
-                            for (Rol r : usuario.getRols()) {
-                                if (r.getNombre().equals("trabajador") || r.getNombre().equals("propietario")) {
-                                    es_trabajador_prop = true;
-                                    break;
-                                }
-                            }
+                            boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3));
 
-                            //Si es trabajador o propietario, se llama al método que actualiza sus establecimientos
-                            if (es_trabajador_prop) {
-                                boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4), (ArrayList<String>) peticion.getData().get(5));
-
-                                //Ejecución sin errores
-                                if (resultadoActualizarUsuario) {
-                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
-                                    datos_actualizar.add(true);
-                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
-                                    out.writeObject(respuesta_actualizar);
-                                } else {
-                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
-                                    datos_actualizar.add(false);
-                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
-                                    out.writeObject(respuesta_actualizar);
-                                }
+                            //Ejecución sin errores
+                            if (resultadoActualizarUsuario) {
+                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                datos_actualizar.add(true);
+                                Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                out.writeObject(respuesta_actualizar);
                             } else {
-                                boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3), (ArrayList<String>) peticion.getData().get(4));
-
-                                //Ejecución sin errores
-                                if (resultadoActualizarUsuario) {
-                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
-                                    datos_actualizar.add(true);
-                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
-                                    out.writeObject(respuesta_actualizar);
-                                } else {
-                                    ArrayList<Object> datos_actualizar = new ArrayList<Object>();
-                                    datos_actualizar.add(false);
-                                    Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
-                                    out.writeObject(respuesta_actualizar);
-                                }
+                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                datos_actualizar.add(false);
+                                Message respuesta_actualizar = new Message("USER_UPDATE", datos_actualizar);
+                                out.writeObject(respuesta_actualizar);
                             }
+                            
 
                         }
 
                         break;
+                        
+                    case "ROLE_ESTABL_UPDATE":
+
+                        
+                        synchronized (this) {
+
+                            String usuario = (String) peticion.getData().get(0);
+                            ArrayList<String> roles = (ArrayList<String>) peticion.getData().get(1);
+                            ArrayList<String> establecimientos = (ArrayList<String>) peticion.getData().get(2);
+
+
+                            boolean resultadoActualizarUsuario = conexion.actualizarUsuario(usuario, roles, establecimientos);
+
+                            //Ejecución sin errores
+                            if (resultadoActualizarUsuario) {
+                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                datos_actualizar.add(true);
+                                Message respuesta_actualizar = new Message("ROLE_ESTABL_UPDATE", datos_actualizar);
+                                out.writeObject(respuesta_actualizar);
+                            } else {
+                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                datos_actualizar.add(false);
+                                Message respuesta_actualizar = new Message("ROLE_ESTABL_UPDATE", datos_actualizar);
+                                out.writeObject(respuesta_actualizar);
+                            }
+                            
+
+                        }
+
+                        break;
+                        
                     case "INSERT_ESTABL":
 
                         synchronized (this) {

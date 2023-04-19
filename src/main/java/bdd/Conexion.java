@@ -510,6 +510,98 @@ public class Conexion implements DAO {
 
         return exito;
     }
+    
+    @Override
+    public boolean actualizarUsuario(String nombreIdentifica, ArrayList<String> roles, ArrayList<String> establecimientos) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el usuario por nomnre (nombre único)
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre", Usuario.class);
+            query.setParameter("nombre", nombreIdentifica);
+            Usuario usuario = (Usuario) query.getSingleResult();
+
+            usuario.setRols(convertToRoleSet(roles));
+            usuario.setEstablecimientos(convertEstabl(establecimientos)); //Cambia sus establecimientos
+
+
+            // Guarda los cambios en la base de datos
+            em.merge(usuario);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Usuario actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+        
+    }
+    
+    @Override
+    public boolean actualizarUsuario(String nombreIdentifica, String nombre, String correo, String passw) {
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el usuario por nomnre (nombre único)
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombre", Usuario.class);
+            query.setParameter("nombre", nombreIdentifica);
+            Usuario usuario = (Usuario) query.getSingleResult();
+
+            usuario.setNombre(nombre);
+            usuario.setCorreo(correo);
+            usuario.setPassw(passw);
+
+            
+
+            // Guarda los cambios en la base de datos
+            em.merge(usuario);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Usuario actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+    }
 
     @Override
     public double getCajaHoy(String establecimiento) {
@@ -529,7 +621,7 @@ public class Conexion implements DAO {
         query.setParameter("nombreestabl", establecimiento);
         try {
             cajaHoy = (double) query.getSingleResult();
-        }catch (NoResultException ex) {
+        }catch (NoResultException | NullPointerException ex) {
             addExcepcion(ex);
         } finally {
             em.close();
@@ -609,5 +701,40 @@ public class Conexion implements DAO {
         return totalPedidos;
 
     }
+
+    @Override
+    public ArrayList<Usuario> getUsuarios(String rol) {
+        
+        ArrayList<Usuario> listaUsuarios = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT DISTINCT u FROM Usuario u JOIN u.rols r WHERE r.nombre = :nombreRol";
+
+        TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+        tq.setParameter("nombreRol", rol);
+
+        List<Usuario> usuarios = null;
+        try {
+
+            usuarios = tq.getResultList();
+
+            for (Usuario u : usuarios) {
+
+                listaUsuarios.add(u);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaUsuarios;
+        
+    }
+
+    
 
 }
