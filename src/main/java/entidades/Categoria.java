@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -26,6 +28,10 @@ public class Categoria  implements Serializable {
     
     @Column(name = "descripcion")
     private String descripcion;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_establecimiento")
+    private Establecimiento establecimiento;
      
 
     public Categoria() {
@@ -60,7 +66,15 @@ public class Categoria  implements Serializable {
         this.descripcion = descripcion;
     }
 
+    public Establecimiento getEstablecimiento() {
+        return establecimiento;
+    }
 
+    public void setEstablecimiento(Establecimiento establecimiento) {
+        this.establecimiento = establecimiento;
+    }
+
+    
 
 
 }

@@ -39,7 +39,7 @@ public class Establecimiento  implements Serializable {
     private Set<Producto> productos = new HashSet<>();
     
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Venta> ventas = new HashSet();
+    private Set<Categoria> categorias = new HashSet<>();
     
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Pedido> pedidos = new HashSet();
@@ -84,13 +84,15 @@ public class Establecimiento  implements Serializable {
     public void setCoordenadas(String coordenadas) {
         this.coordenadas = coordenadas;
     }
-    public Set getVentas() {
-        return this.ventas;
+
+    public Set<Categoria> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(Set<Categoria> categorias) {
+        this.categorias = categorias;
     }
     
-    public void setVentas(Set ventas) {
-        this.ventas = ventas;
-    }
     public Set getProductos() {
         return this.productos;
     }

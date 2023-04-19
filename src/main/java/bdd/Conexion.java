@@ -4,10 +4,10 @@
  */
 package bdd;
 
+import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.Rol;
 import entidades.Usuario;
-import entidades.Venta;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -732,6 +732,101 @@ public class Conexion implements DAO {
         }
 
         return listaUsuarios;
+        
+    }
+
+    @Override
+    public boolean insertarCategoria(String nombre, String descripcion, Establecimiento establecimiento) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            Categoria categoria = new Categoria(nombre, descripcion);
+            categoria.setEstablecimiento(establecimiento);
+            //establecimiento.getCategorias().add(categoria);
+            
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(categoria);
+            //em.merge(establecimiento);
+            tx.commit();
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+        
+    }
+
+    @Override
+    public Establecimiento getEstablecimiento(String nombre) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT c FROM Establecimiento c WHERE c.nombre = :nombrebuscar";
+
+        TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
+        tq.setParameter("nombrebuscar", nombre);
+
+        Establecimiento establecimiento = null;
+        try {
+
+            establecimiento = tq.getSingleResult();
+            //System.out.println(usuario.getNombre());
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return establecimiento;
+        
+    }
+
+    @Override
+    public ArrayList<Categoria> getCategorias(String establecimiento) {
+        
+        ArrayList<Categoria> listaCategorias = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT c FROM Categoria c WHERE c.establecimiento.nombre = :nombreEstabl";
+
+        TypedQuery<Categoria> tq = em.createQuery(query, Categoria.class);
+        tq.setParameter("nombreEstabl", establecimiento);
+
+        List<Categoria> categorias = null;
+        try {
+
+            categorias = tq.getResultList();
+
+            for (Categoria c : categorias) {
+
+                listaCategorias.add(c);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaCategorias;
         
     }
 

@@ -5,6 +5,7 @@
 package server;
 
 import bdd.Conexion;
+import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.Rol;
 import entidades.Usuario;
@@ -361,6 +362,26 @@ public class HiloCliente implements Runnable {
                             out.writeObject(respuesta_prop_query);
                         }
 
+                        break; 
+                        
+                    case "ESTABL_CATEGORY_QUERY":
+
+                        synchronized (this) {
+                            String establecimiento = (String) peticion.getData().get(0);
+                            ArrayList<Categoria> categorias = conexion.getCategorias(establecimiento);
+                            
+                            System.out.println(categorias);
+                            ArrayList<Object> datos_categories_query = new ArrayList<Object>();
+                            
+                            for(Categoria c : categorias){
+                                datos_categories_query.add(c.getNombre());
+                            }
+                            
+                            
+                            Message respuesta_categories_query = new Message("ESTABL_CATEGORY_QUERY", datos_categories_query);
+                            out.writeObject(respuesta_categories_query);
+                        }
+
                         break;    
 
                     case "INSERT_USER":
@@ -499,6 +520,34 @@ public class HiloCliente implements Runnable {
                         }
 
                         break;
+                        
+                    case "INSERT_CATEGORY":
+
+                        synchronized (this) {
+
+                            String nombreCategoria = (String) peticion.getData().get(0);
+                            String descripcionCategoria = (String) peticion.getData().get(1);
+                            Establecimiento establCategoria = conexion.getEstablecimiento((String) peticion.getData().get(2));
+                            System.out.println(establCategoria);
+                            
+                            boolean resultadoInsertarCategoria = conexion.insertarCategoria(nombreCategoria, descripcionCategoria,establCategoria);
+
+                            //Ejecución sin errores
+                            if (resultadoInsertarCategoria) {
+                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                datos_insert.add(true);
+                                Message respuesta_insert = new Message("INSERT_CATEGORY", datos_insert);
+                                out.writeObject(respuesta_insert);
+
+                            } else {
+                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                datos_insert.add(false);
+                                Message respuesta_insert = new Message("INSERT_CATEGORY", datos_insert);
+                                out.writeObject(respuesta_insert);
+                            }
+                        }
+
+                        break;    
 
                 }
 

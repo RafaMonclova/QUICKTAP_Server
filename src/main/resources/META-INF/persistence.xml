@@ -13,7 +13,6 @@
         <class>entidades.Usuario</class>
         <class>entidades.Establecimiento</class>
         <class>entidades.Producto</class>
-        <class>entidades.Venta</class>
         <class>entidades.Categoria</class>
         <class>entidades.LineaPedido</class>
         <class>entidades.Pedido</class>

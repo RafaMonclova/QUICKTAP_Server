@@ -5,6 +5,7 @@
 package bdd;
 
 
+import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.Usuario;
 import java.util.ArrayList;
@@ -23,11 +24,13 @@ public interface DAO {
     public boolean insertarUsuario(String name,String mail,String password,ArrayList<String> roles,ArrayList<String> establecimientos); //Propietario y trabajador
     public Usuario getUsuario(String correo,String passw);
     public Usuario getUsuario(String nombre);
+    public Establecimiento getEstablecimiento(String nombre);
     
     public ArrayList<String> getRoles();
     public ArrayList<String> getEstablecimientos();
     
     public ArrayList<Usuario> getUsuarios(String rol);
+    public ArrayList<Categoria> getCategorias(String establecimiento);
     
     public Set convertToRoleSet(ArrayList<String> roles);
     
@@ -48,5 +51,7 @@ public interface DAO {
     public double getCajaHoy(String establecimiento);
     public ArrayList<Usuario> getUsuarios(Set<Establecimiento> establecimientos); //Devuelve una lista con los usuarios que forman parte de los establecimientos dados
     public long getNumPedidos(String estado);
+    
+    public boolean insertarCategoria(String nombre, String descripcion, Establecimiento establecimiento);
     
 }
