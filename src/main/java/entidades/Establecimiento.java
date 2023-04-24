@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -44,6 +45,8 @@ public class Establecimiento  implements Serializable {
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Pedido> pedidos = new HashSet();
 
+    @ManyToMany(mappedBy = "establecimientos")
+    private Set<Usuario> usuarios;
 
     public Establecimiento() {
     }
@@ -107,13 +110,13 @@ public class Establecimiento  implements Serializable {
     public void setPedidos(Set pedidos) {
         this.pedidos = pedidos;
     }
-//    public Set getUsuarios() {
-//        return this.usuarios;
-//    }
-//    
-//    public void setUsuarios(Set usuarios) {
-//        this.usuarios = usuarios;
-//    }
+    public Set getUsuarios() {
+        return this.usuarios;
+    }
+    
+    public void setUsuarios(Set usuarios) {
+        this.usuarios = usuarios;
+    }
 
 
 

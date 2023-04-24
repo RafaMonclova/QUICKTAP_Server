@@ -72,3 +72,13 @@
 [01:03:28]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [01:03:37]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [01:03:37]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:20:51]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:20:51]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:21:05]No entity found for query
+[06:41:28]No entity found for query
+[06:45:38]No entity found for query
+[06:45:38]No entity found for query
+[07:48:54]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:48:54]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:48:56]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:48:56]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null

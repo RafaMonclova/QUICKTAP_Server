@@ -5,6 +5,7 @@
  */
 package server;
 
+import utilidades.CounterResetTask;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +21,7 @@ public class Server {
     private static final int PUERTO = 4444;
     private static List<HiloCliente> listaClientes = new ArrayList<>();
     
-    Map<HiloCliente, List<Exception>> exceptionsMap = new HashMap<>();
+    //Map<HiloCliente, List<Exception>> exceptionsMap = new HashMap<>();
 
     private static int contadorNuevosClientes = 0;
 

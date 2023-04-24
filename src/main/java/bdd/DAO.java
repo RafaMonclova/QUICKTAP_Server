@@ -8,6 +8,7 @@ package bdd;
 import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.Usuario;
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public interface DAO {
     
     public ArrayList<String> getRoles();
     public ArrayList<String> getEstablecimientos();
+    public ArrayList<String> getEstablecimientos(String usuario);
     
     public ArrayList<Usuario> getUsuarios(String rol);
     public ArrayList<Categoria> getCategorias(String establecimiento);
@@ -36,6 +38,7 @@ public interface DAO {
     
     public boolean insertarEstabl(String nombre, String direccion, String coords);
     public Set convertEstabl(ArrayList<String> establecimientos);
+    public Set convertCategorias(ArrayList<String> categorias);
     
     public boolean actualizarUsuario(String nombreIdentifica, 
             String nombre, String correo, String passw, ArrayList<String> roles); //Administrador y cliente
@@ -53,5 +56,5 @@ public interface DAO {
     public long getNumPedidos(String estado);
     
     public boolean insertarCategoria(String nombre, String descripcion, Establecimiento establecimiento);
-    
+    public boolean insertarProducto(String nombre, String descripcion, double precio,int stockInicial, byte[] imagen,ArrayList<String> categorias,Establecimiento establecimiento);
 }

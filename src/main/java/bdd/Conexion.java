@@ -6,6 +6,7 @@ package bdd;
 
 import entidades.Categoria;
 import entidades.Establecimiento;
+import entidades.Producto;
 import entidades.Rol;
 import entidades.Usuario;
 import java.io.FileWriter;
@@ -414,6 +415,38 @@ public class Conexion implements DAO {
         }
 
         return setEstabl;
+
+    }
+    
+    @Override
+    public Set<Categoria> convertCategorias(ArrayList<String> categorias) {
+
+        Set<Categoria> setCateg = new HashSet();
+
+        for (String c : categorias) {
+
+            EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+            String query = "SELECT c FROM Categoria c where c.nombre = :nombrecateg";
+
+            TypedQuery<Categoria> tq = em.createQuery(query, Categoria.class);
+            tq.setParameter("nombrecateg", c);
+
+            Categoria categoria = null;
+            try {
+
+                categoria = tq.getSingleResult();
+
+                setCateg.add(categoria);
+
+            } catch (NoResultException ex) {
+                addExcepcion(ex);
+            } finally {
+                em.close();
+            }
+        }
+
+        return setCateg;
 
     }
 
@@ -829,6 +862,79 @@ public class Conexion implements DAO {
         return listaCategorias;
         
     }
+
+    @Override
+    public boolean insertarProducto(String nombre, String descripcion, double precio, int stockInicial, byte[] imagen, ArrayList<String> categorias, Establecimiento establecimiento) {
+    
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            Producto producto = new Producto(nombre, descripcion,precio,imagen,stockInicial);
+            producto.setEstablecimiento(establecimiento);
+            producto.setCategorias(convertCategorias(categorias));
+            //establecimiento.getCategorias().add(categoria);
+            
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(producto);
+            //em.merge(establecimiento);
+            tx.commit();
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+    
+    }
+
+    @Override
+    public ArrayList<String> getEstablecimientos(String usuario) {
+        
+        ArrayList<String> listaEstabl = new ArrayList<String>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT e FROM Establecimiento e JOIN e.usuarios u WHERE u = :usuario";
+
+        TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
+        tq.setParameter("usuario", usuario);
+        
+        List<Establecimiento> establecimientos = null;
+        try {
+
+            establecimientos = tq.getResultList();
+
+            for (Establecimiento e : establecimientos) {
+
+                listaEstabl.add(e.getNombre());
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaEstabl;
+        
+    }
+
+    
 
     
 
