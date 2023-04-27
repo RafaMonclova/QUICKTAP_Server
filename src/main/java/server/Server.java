@@ -20,9 +20,6 @@ public class Server {
 
     private static final int PUERTO = 4444;
     private static List<HiloCliente> listaClientes = new ArrayList<>();
-    
-    //Map<HiloCliente, List<Exception>> exceptionsMap = new HashMap<>();
-
     private static int contadorNuevosClientes = 0;
 
     public static void main(String[] args) {
@@ -31,8 +28,7 @@ public class Server {
             System.out.println("Servidor iniciado en el puerto " + PUERTO);
 
             //Inicializa la tarea de comprobación, que reiniciará el contador de nuevos clientes a las 0:00
-            
-            startCounterResetTask();
+            iniciarContador();
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -79,11 +75,11 @@ public class Server {
     }
 
     //Ejecuta la tarea de comprobación cada minuto
-    private static void startCounterResetTask() {
-        CounterResetTask task = new CounterResetTask();
+    private static void iniciarContador() {
+        CounterResetTask tarea = new CounterResetTask(contadorNuevosClientes);
 
         // Programar la tarea para que se ejecute cada minuto
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, 60 * 1000);
+        timer.scheduleAtFixedRate(tarea, 0, 60 * 1000);
     }
 }

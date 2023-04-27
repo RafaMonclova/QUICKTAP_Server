@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -32,6 +33,9 @@ public class Categoria  implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
     private Establecimiento establecimiento;
+    
+    @ManyToMany(mappedBy = "categorias")
+    private Set<Producto> productos;
      
 
     public Categoria() {
@@ -72,6 +76,14 @@ public class Categoria  implements Serializable {
 
     public void setEstablecimiento(Establecimiento establecimiento) {
         this.establecimiento = establecimiento;
+    }
+
+    public Set<Producto> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(Set<Producto> productos) {
+        this.productos = productos;
     }
 
     

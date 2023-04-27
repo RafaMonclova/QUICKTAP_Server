@@ -876,15 +876,24 @@ public class Conexion implements DAO {
             Producto producto = new Producto(nombre, descripcion,precio,imagen,stockInicial);
             producto.setEstablecimiento(establecimiento);
             producto.setCategorias(convertCategorias(categorias));
-            //establecimiento.getCategorias().add(categoria);
-            
 
-            tx = em.getTransaction();
-            tx.begin();
-            em.persist(producto);
-            //em.merge(establecimiento);
-            tx.commit();
-            exito = true;
+            //Comprueba si existe un producto con ese nombre en el establecimiento seleccionado
+            //Si existe, no lo inserta
+//            if(getProducto(nombre,establecimiento.getNombre()) != null){
+//                
+//                exito = false;
+//                
+//            }
+//            else{
+                tx = em.getTransaction();
+                tx.begin();
+                em.persist(producto);
+                //em.merge(establecimiento);
+                tx.commit();
+                exito = true;
+            //}
+            
+            
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -908,7 +917,7 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        String query = "SELECT e FROM Establecimiento e JOIN e.usuarios u WHERE u = :usuario";
+        String query = "SELECT e FROM Establecimiento e JOIN e.usuarios u WHERE u.nombre = :usuario";
 
         TypedQuery<Establecimiento> tq = em.createQuery(query, Establecimiento.class);
         tq.setParameter("usuario", usuario);
@@ -931,6 +940,117 @@ public class Conexion implements DAO {
         }
 
         return listaEstabl;
+        
+    }
+
+    @Override
+    public ArrayList<Producto> getProductos(String establecimiento) {
+        
+        ArrayList<Producto> listaProductos = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT p FROM Producto p WHERE p.establecimiento.nombre = :nombreEstabl";
+
+        TypedQuery<Producto> tq = em.createQuery(query, Producto.class);
+        tq.setParameter("nombreEstabl", establecimiento);
+
+        List<Producto> productos = null;
+        try {
+
+            productos = tq.getResultList();
+
+            for (Producto p : productos) {
+
+                listaProductos.add(p);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaProductos;
+        
+    }
+
+    @Override
+    public Producto getProducto(String nombreProducto, String establecimientoProducto) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT p FROM Producto p WHERE p.nombre = :nombreproducto and p.establecimiento.nombre = :establproducto";
+
+        TypedQuery<Producto> tq = em.createQuery(query, Producto.class);
+        tq.setParameter("nombreproducto", nombreProducto);
+        tq.setParameter("establproducto", establecimientoProducto);
+
+        Producto producto = null;
+        try {
+
+            producto = tq.getSingleResult();
+            //System.out.println(usuario.getNombre());
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return producto;
+        
+    }
+
+    @Override
+    public boolean actualizarProducto(String nombreProducto,String nombreEstablecimiento, String nuevoNombre,String nuevaDescrip,
+            double nuevoPrecio, int nuevoStock,byte[] nuevaImagen, ArrayList<String> nuevasCategorias) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el producto por nombre y establecimiento (un establecimiento no puede tener varios productos con el mismo nombre)
+            TypedQuery<Producto> query = em.createQuery("SELECT p FROM Producto p WHERE p.nombre = :nombreproducto and p.establecimiento.nombre = :nombreestabl", Producto.class);
+            query.setParameter("nombreproducto", nombreProducto);
+            query.setParameter("nombreestabl", nombreEstablecimiento);
+            
+            Producto producto = (Producto) query.getSingleResult();
+
+            producto.setNombre(nuevoNombre);
+            producto.setDescripcion(nuevaDescrip);
+            producto.setPrecio(nuevoPrecio);
+            producto.setStock(nuevoStock);
+            producto.setImagen(nuevaImagen);
+            producto.setCategorias(convertCategorias(nuevasCategorias));
+
+            // Guarda los cambios en la base de datos
+            em.merge(producto);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Producto actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
         
     }
 

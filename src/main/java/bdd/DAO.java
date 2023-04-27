@@ -7,8 +7,8 @@ package bdd;
 
 import entidades.Categoria;
 import entidades.Establecimiento;
+import entidades.Producto;
 import entidades.Usuario;
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -34,6 +34,9 @@ public interface DAO {
     public ArrayList<Usuario> getUsuarios(String rol);
     public ArrayList<Categoria> getCategorias(String establecimiento);
     
+    public Producto getProducto(String nombreProducto,String establecimientoProducto);
+    public ArrayList<Producto> getProductos(String establecimiento);
+    
     public Set convertToRoleSet(ArrayList<String> roles);
     
     public boolean insertarEstabl(String nombre, String direccion, String coords);
@@ -45,11 +48,16 @@ public interface DAO {
     public boolean actualizarUsuario(String nombreIdentifica, 
             String nombre, String correo, String passw, ArrayList<String> roles, ArrayList<String> establecimientos); //Propietario y trabajador
     
+    //Datos personales
     public boolean actualizarUsuario(String nombreIdentifica, 
             String nombre, String correo, String passw);
     
+    //Roles y establecimientos
     public boolean actualizarUsuario(String nombreIdentifica, 
             ArrayList<String> roles,ArrayList<String> establecimientos);
+    
+    public boolean actualizarProducto(String nombreProducto,String nombreEstablecimiento, String nuevoNombre,String nuevaDescrip,
+            double nuevoPrecio, int nuevoStock,byte[] nuevaImagen, ArrayList<String> nuevasCategorias);
     
     public double getCajaHoy(String establecimiento);
     public ArrayList<Usuario> getUsuarios(Set<Establecimiento> establecimientos); //Devuelve una lista con los usuarios que forman parte de los establecimientos dados
