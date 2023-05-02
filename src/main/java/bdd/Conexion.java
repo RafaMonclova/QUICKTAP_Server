@@ -6,6 +6,7 @@ package bdd;
 
 import entidades.Categoria;
 import entidades.Establecimiento;
+import entidades.LineaPedido;
 import entidades.Producto;
 import entidades.Rol;
 import entidades.Usuario;
@@ -16,6 +17,8 @@ import java.sql.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,6 +40,7 @@ import org.hibernate.PropertyValueException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import java.util.Date;
 
 /**
  *
@@ -636,11 +640,50 @@ public class Conexion implements DAO {
         return exito;
     }
 
+//    @Override
+//    public double getCajaHoy(String establecimiento) {
+//
+//        double cajaHoy = 0;
+//
+//        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+//
+//        String jpql = "SELECT SUM(lp.cantidad * p.precio) AS precio_total\n"
+//                + "FROM LineaPedido lp\n"
+//                + "JOIN lp.producto p\n"
+//                + "JOIN lp.pedido pe\n"
+//                + "JOIN pe.establecimiento e\n"
+//                + "WHERE pe.fecha = CURRENT_DATE and e.nombre = :nombreestabl";
+//
+//        Query query = (Query) em.createQuery(jpql);
+//        query.setParameter("nombreestabl", establecimiento);
+//        try {
+//            cajaHoy = (double) query.getSingleResult();
+//        }catch (NoResultException | NullPointerException ex) {
+//            addExcepcion(ex);
+//        } finally {
+//            em.close();
+//        }
+//        
+//        
+//
+//        return cajaHoy;
+//
+//    }
+    
     @Override
-    public double getCajaHoy(String establecimiento) {
+    public double getCaja(String establecimiento,String fecha) {
 
-        double cajaHoy = 0;
-
+        double caja = 0;
+        
+        SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+        Date fechaDate = null;
+        try {
+            fechaDate = formato.parse(fecha);
+            System.out.println(fecha);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
         String jpql = "SELECT SUM(lp.cantidad * p.precio) AS precio_total\n"
@@ -648,12 +691,13 @@ public class Conexion implements DAO {
                 + "JOIN lp.producto p\n"
                 + "JOIN lp.pedido pe\n"
                 + "JOIN pe.establecimiento e\n"
-                + "WHERE pe.fecha = CURRENT_DATE and e.nombre = :nombreestabl";
+                + "WHERE pe.fecha = :fecha and e.nombre = :nombreestabl";
 
         Query query = (Query) em.createQuery(jpql);
+        query.setParameter("fecha", fechaDate);
         query.setParameter("nombreestabl", establecimiento);
         try {
-            cajaHoy = (double) query.getSingleResult();
+            caja = (double) query.getSingleResult();
         }catch (NoResultException | NullPointerException ex) {
             addExcepcion(ex);
         } finally {
@@ -662,7 +706,7 @@ public class Conexion implements DAO {
         
         
 
-        return cajaHoy;
+        return caja;
 
     }
 
@@ -1054,7 +1098,38 @@ public class Conexion implements DAO {
         
     }
 
-    
+    @Override
+    public ArrayList<LineaPedido> getLineaPedidos(String establecimiento) {
+        
+        ArrayList<LineaPedido> listaLineasPedidos = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT p FROM Producto p WHERE p.establecimiento.nombre = :nombreEstabl";
+
+        TypedQuery<LineaPedido> tq = em.createQuery(query, LineaPedido.class);
+        tq.setParameter("nombreEstabl", establecimiento);
+
+        List<LineaPedido> lineasPedidos = null;
+        try {
+
+            lineasPedidos = tq.getResultList();
+
+            for (LineaPedido p : lineasPedidos) {
+
+                listaLineasPedidos.add(p);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaLineasPedidos;
+        
+    }
 
     
 

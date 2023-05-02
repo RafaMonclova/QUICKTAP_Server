@@ -111,6 +111,8 @@ public class Usuario implements Serializable {
         this.establecimientos = establecimientos;
     }
     
-    
+    public String toString(){
+        return nombre;
+    }
 
 }

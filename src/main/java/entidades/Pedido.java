@@ -103,7 +103,9 @@ public class Pedido  implements Serializable {
     }
     
     
-
+    public String toString(){
+        return "Pedido "+id;
+    }
 
 
 }

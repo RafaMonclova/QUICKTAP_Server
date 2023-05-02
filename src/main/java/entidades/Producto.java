@@ -125,8 +125,9 @@ public class Producto  implements Serializable {
         this.establecimiento = establecimiento;
     }
 
-
-
+    public String toString(){
+        return nombre;
+    }
 
 }
 

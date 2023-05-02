@@ -7,6 +7,7 @@ package server;
 import bdd.Conexion;
 import entidades.Categoria;
 import entidades.Establecimiento;
+import entidades.LineaPedido;
 import entidades.Producto;
 import entidades.Rol;
 import entidades.Usuario;
@@ -204,7 +205,8 @@ public class HiloCliente implements Runnable {
                                             double cajaHoy = 0;
                                             for (Establecimiento e : usuario.getEstablecimientos()) {
                                                 System.out.println(e.getNombre());
-                                                cajaHoy += conexion.getCajaHoy(e.getNombre());
+                                                String fechaHoy = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                                cajaHoy += conexion.getCaja(e.getNombre(),fechaHoy);
                                             }
 
                                             datos_establ_query.add(cajaHoy);
@@ -243,6 +245,65 @@ public class HiloCliente implements Runnable {
                                             out.writeObject(respuesta_establ_query);
                                         }
                                         break;
+                                        
+                                    case "GET_CAJAS":
+
+                                        synchronized (this) {
+                                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
+
+                                            ArrayList<Object> datos_caja_query = new ArrayList<Object>();
+                                            
+                                            
+                                            for (Establecimiento e : usuario.getEstablecimientos()) {
+                                                ArrayList<Object> datosEstabl = new ArrayList<>();
+                                                
+                                                String fechaHoy = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                                double cajaHoy = conexion.getCaja(e.getNombre(),fechaHoy);
+                                                datosEstabl.add(e.getNombre());
+                                                datosEstabl.add(cajaHoy);
+                                                
+                                                datos_caja_query.add(datosEstabl);
+                                            }
+
+                                            Message respuesta_caja_query = new Message("SERVIDOR", "GET_CAJAS", datos_caja_query);
+                                            out.writeObject(respuesta_caja_query);
+                                        }
+                                        break;  
+                                        
+                                    case "GET_TRABAJADORES_CONECTADOS":
+
+                                        synchronized (this) {
+                                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
+
+                                            ArrayList<Object> datos_trabajadores_query = new ArrayList<Object>();
+                                            
+                                            //Comprueba qué usuarios de los establecimientos están conectados al servidor
+                                            for (Usuario u : conexion.getUsuarios(usuario.getEstablecimientos())) {
+                                                ArrayList<Object> datosUsuarios = new ArrayList<>();
+                                                for (HiloCliente h : Server.getListaClientes()) {
+
+                                                    if (u.getNombre().equals(h.getUsuario().getNombre())) {
+                                                        System.out.println("usuario: "+u.getNombre());
+                                                        datosUsuarios.add(u.getNombre());
+                                                        ArrayList<String> rolesUsuario = new ArrayList<>();
+                                                        for(Rol r : u.getRols()){
+                                                            rolesUsuario.add(r.getNombre());
+                                                        }
+                                                        
+                                                        datosUsuarios.add(rolesUsuario);
+                                                        //Se añade el usuario a la lista de datos de la respuesta
+                                                        datos_trabajadores_query.add(datosUsuarios);
+
+                                                    }
+
+                                                }
+                                                
+                                            }
+                                            
+                                            Message respuesta_trabajadores_query = new Message("SERVIDOR", "GET_TRABAJADORES_CONECTADOS", datos_trabajadores_query);
+                                            out.writeObject(respuesta_trabajadores_query);
+                                        }
+                                        break;     
 
                                     case "LOGOUT":
 
@@ -758,6 +819,46 @@ public class HiloCliente implements Runnable {
                                 break;
 
                             case "PEDIDO":
+                                
+                                switch(peticion.getRequestAction()){
+                                    
+                                    case "GET_PEDIDOS":
+                                    
+                                        synchronized (this) {
+
+                                            //Obtiene todas las líneas de pedido del establecimiento recibido
+                                            String establecimiento = (String) peticion.getData().get(0);
+                                            ArrayList<LineaPedido> lineasPedidos = conexion.getLineaPedidos(establecimiento);
+
+                                            //Lista de "LineaPedido"
+                                            ArrayList<Object> datos_pedidos_query = new ArrayList<Object>();
+
+                                            //Recorre la lista de líneas de pedidos de la base de datos
+                                            //Por cada una, se crea una lista para añadir sus campos, y se añade a la lista inicial que se envía
+                                            //al cliente.
+                                            for (LineaPedido p : lineasPedidos) {
+
+                                                ArrayList<Object> camposLinea = new ArrayList<>();
+                                                camposLinea.add(p.getPedido());
+                                                camposLinea.add(p.getCliente());
+                                                camposLinea.add(p.getProducto());
+                                                camposLinea.add(p.getCantidad());
+                                                camposLinea.add(p.getEstado());
+
+                                                datos_pedidos_query.add(camposLinea);
+
+                                            }
+
+                                            Message respuesta_pedidos_query = new Message("PEDIDO", "GET_PEDIDOS", datos_pedidos_query);
+                                            out.writeObject(respuesta_pedidos_query);
+                                        }
+
+                                        break;
+                                    
+                                }
+                                
+                                
+                                
                                 break;
 
                         }
