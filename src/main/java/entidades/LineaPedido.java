@@ -6,7 +6,9 @@ package entidades;
 
 import java.io.Serializable;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,17 +20,15 @@ import javax.persistence.Table;
 @Table(name = "linea_pedido")
 public class LineaPedido implements Serializable{
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    @EmbeddedId
+    private LineaPedidoId id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_pedido")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_pedido", insertable = false, updatable = false)
     private Pedido pedido;
 
-    @ManyToOne
-    @JoinColumn(name = "id_producto")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_producto", insertable = false, updatable = false)
     private Producto producto;
 
     @ManyToOne
@@ -53,11 +53,11 @@ public class LineaPedido implements Serializable{
         this.estado = estado;
     }
 
-    public int getId() {
+    public LineaPedidoId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(LineaPedidoId id) {
         this.id = id;
     }
 

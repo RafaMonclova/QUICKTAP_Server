@@ -40,6 +40,8 @@ public interface DAO {
     
     public ArrayList<LineaPedido> getLineaPedidos(String establecimiento);
     
+    public ArrayList<Usuario> getTrabajadores(String establecimiento);
+    
     public Set convertToRoleSet(ArrayList<String> roles);
     
     public boolean insertarEstabl(String nombre, String direccion, String coords);
@@ -61,6 +63,12 @@ public interface DAO {
     
     public boolean actualizarProducto(String nombreProducto,String nombreEstablecimiento, String nuevoNombre,String nuevaDescrip,
             double nuevoPrecio, int nuevoStock,byte[] nuevaImagen, ArrayList<String> nuevasCategorias);
+    
+    public boolean actualizarTrabajador(String nombreTrabajador, String nuevoNombre,String nuevoCorreo,
+            String nuevaPassw, ArrayList<String> nuevosEstablecimientos);
+    
+    public boolean borrarProducto(String nombreProducto, String establProducto);
+    public boolean borrarUsuario(String nombreUsuario);
     
     //public double getCajaHoy(String establecimiento); 
     public double getCaja(String establecimiento, String fecha);

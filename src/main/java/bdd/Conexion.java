@@ -41,6 +41,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import java.util.Date;
+import javax.transaction.Transactional;
 
 /**
  *
@@ -1098,6 +1099,7 @@ public class Conexion implements DAO {
         
     }
 
+    @Transactional
     @Override
     public ArrayList<LineaPedido> getLineaPedidos(String establecimiento) {
         
@@ -1105,18 +1107,32 @@ public class Conexion implements DAO {
 
         EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        String query = "SELECT p FROM Producto p WHERE p.establecimiento.nombre = :nombreEstabl";
-
-        TypedQuery<LineaPedido> tq = em.createQuery(query, LineaPedido.class);
-        tq.setParameter("nombreEstabl", establecimiento);
+        //String query = "SELECT lp FROM LineaPedido lp WHERE p.establecimiento.nombre = :nombreEstabl";
+        /*
+        String jpql = "SELECT lp FROM LineaPedido lp\n"
+                + "JOIN lp.producto p\n"
+                + "JOIN lp.pedido pe\n"
+                + "JOIN pe.establecimiento e\n"
+                + "WHERE lp.estado = :estado and e.nombre = :nombreestabl";
+        */
+        
+        String jpql = "SELECT lp FROM LineaPedido lp " +
+              "JOIN lp.pedido p " +
+              "JOIN p.establecimiento e " +
+              "WHERE e.nombre = :nombreestabl and lp.estado = :estado";
+        
+        Query query = (Query) em.createQuery(jpql);
+        query.setParameter("estado", "EN PREPARACIÓN");
+        query.setParameter("nombreestabl", establecimiento);
 
         List<LineaPedido> lineasPedidos = null;
         try {
 
-            lineasPedidos = tq.getResultList();
+            lineasPedidos = query.getResultList();
 
             for (LineaPedido p : lineasPedidos) {
-
+                
+                
                 listaLineasPedidos.add(p);
 
             }
@@ -1128,6 +1144,181 @@ public class Conexion implements DAO {
         }
 
         return listaLineasPedidos;
+        
+    }
+    
+    @Override
+    public ArrayList<Usuario> getTrabajadores(String establecimiento) {
+        
+        ArrayList<Usuario> listaTrabajadores = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT DISTINCT u FROM Usuario u JOIN u.establecimientos e WHERE e.nombre = :nombreestabl";
+
+        TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+        tq.setParameter("nombreestabl", establecimiento);
+
+        List<Usuario> usuarios = null;
+        try {
+
+            usuarios = tq.getResultList();
+
+            for (Usuario u : usuarios) {
+
+                listaTrabajadores.add(u);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaTrabajadores;
+        
+    }
+    
+    @Override
+    public boolean actualizarTrabajador(String nombreTrabajador, String nuevoNombre,String nuevoCorreo,
+            String nuevaPassw, ArrayList<String> nuevosEstablecimientos) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        boolean exito = false;
+
+        try {
+
+            // Iniciar la transacción
+            em.getTransaction().begin();
+
+            // Obtiene el producto por nombre y establecimiento (un establecimiento no puede tener varios productos con el mismo nombre)
+            TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u WHERE u.nombre = :nombreusuario", Usuario.class);
+            query.setParameter("nombreusuario", nombreTrabajador);
+            
+            Usuario usuario = (Usuario) query.getSingleResult();
+
+            usuario.setNombre(nuevoNombre);
+            usuario.setCorreo(nuevoCorreo);
+            usuario.setPassw(nuevaPassw);
+            
+            usuario.setEstablecimientos(convertEstabl(nuevosEstablecimientos));
+
+            // Guarda los cambios en la base de datos
+            em.merge(usuario);
+
+            // Confirma la transacción
+            em.getTransaction().commit();
+
+            System.out.println("Usuario actualizado.");
+            exito = true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+
+        } finally {
+            em.close();
+        }
+
+        return exito;
+        
+    }
+
+    @Override
+    public boolean borrarProducto(String nombreProducto, String establProducto) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+        
+        boolean exito = false;
+        
+        String query = "SELECT p FROM Producto p WHERE p.nombre = :nombreproducto and p.establecimiento.nombre = :establproducto";
+
+        TypedQuery<Producto> tq = em.createQuery(query, Producto.class);
+        tq.setParameter("nombreproducto", nombreProducto);
+        tq.setParameter("establproducto", establProducto);
+
+        Producto producto = null;
+        try {
+            
+            // Iniciar la transacción
+            em.getTransaction().begin();
+            
+            producto = tq.getSingleResult();
+            
+            //Borra el producto
+            em.remove(producto);
+            
+            // Confirma la transacción
+            em.getTransaction().commit();
+            
+            System.out.println("Producto borrado.");
+            exito = true;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+        } finally {
+            em.close();
+        }
+        
+        return exito;
+        
+    }
+
+    @Override
+    public boolean borrarUsuario(String nombreUsuario) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+        
+        boolean exito = false;
+        
+        String query = "SELECT u FROM Usuario u WHERE u.nombre = :nombreusuario";
+
+        TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+        tq.setParameter("nombreusuario", nombreUsuario);
+        
+
+        Usuario usuario = null;
+        try {
+            
+            // Iniciar la transacción
+            em.getTransaction().begin();
+            
+            usuario = tq.getSingleResult();
+            
+            //Borra el producto
+            em.remove(usuario);
+            
+            // Confirma la transacción
+            em.getTransaction().commit();
+            
+            System.out.println("Usuario borrado.");
+            exito = true;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                exito = false;
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+        } finally {
+            em.close();
+        }
+        
+        return exito;
         
     }
 

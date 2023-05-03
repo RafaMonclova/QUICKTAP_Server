@@ -530,6 +530,61 @@ public class HiloCliente implements Runnable {
                                         }
 
                                         break;
+                                        
+                                    case "ACTUALIZAR_DATOS_TRABAJADOR":
+
+                                        String trabajador_a_actualizar = (String) peticion.getData().get(0);
+
+                                        String nuevoNombre = (String) peticion.getData().get(1);
+                                        String nuevoCorreo = (String) peticion.getData().get(2);
+                                        String nuevaPassw = (String) peticion.getData().get(3);
+                                        
+                                        ArrayList<String> nuevosEstablecimientos = (ArrayList<String>) peticion.getData().get(4);
+
+                                        synchronized (this) {
+
+                                            boolean resultadoActualizarTrabajador = conexion.actualizarTrabajador(trabajador_a_actualizar, nuevoNombre, nuevoCorreo, nuevaPassw, nuevosEstablecimientos);
+
+                                            //Ejecución sin errores
+                                            if (resultadoActualizarTrabajador) {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(true);
+                                                Message respuesta_actualizar = new Message("USUARIO", "ACTUALIZAR_DATOS_TRABAJADOR", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            } else {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(false);
+                                                Message respuesta_actualizar = new Message("USUARIO", "ACTUALIZAR_DATOS_TRABAJADOR", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            }
+
+                                        }
+
+                                        break; 
+                                        
+                                    case "BORRAR":
+                                        
+                                        synchronized (this) {
+
+                                            String usuarioBorrar = (String) peticion.getData().get(0);
+
+                                            boolean resultadoBorrarUsuario = conexion.borrarUsuario(usuarioBorrar);
+                                            //Ejecución sin productoBorrar
+                                            if (resultadoBorrarUsuario) {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(true);
+                                                Message respuesta_delete = new Message("USUARIO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_delete);
+
+                                            } else {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(false);
+                                                Message respuesta_insert = new Message("USUARIO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_insert);
+                                            }
+                                        }
+
+                                        break;      
                                 }
 
                                 break;
@@ -575,9 +630,10 @@ public class HiloCliente implements Runnable {
                                         synchronized (this) {
 
                                             ArrayList<String> establList = conexion.getEstablecimientos(usuario);
+                                            System.out.println(establList);
                                             ArrayList<Object> datos_establ_query = new ArrayList<Object>();
                                             datos_establ_query.add(establList);
-                                            Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_ESTABLECIMIENTOS", datos_establ_query);
+                                            Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_ESTABLECIMIENTOS_USUARIO", datos_establ_query);
                                             out.writeObject(respuesta_establ_query);
                                         }
 
@@ -607,6 +663,39 @@ public class HiloCliente implements Runnable {
                                         }
 
                                         break;
+                                        
+                                    case "GET_TRABAJADORES":
+                                    
+                                        synchronized (this) {
+
+                                            //Obtiene todos los trabajadores del establecimiento recibido
+                                            String establecimiento = (String) peticion.getData().get(0);
+                                            ArrayList<Usuario> trabajadores = conexion.getTrabajadores(establecimiento);
+
+                                            //Lista de "Usuario" (trabajador)
+                                            ArrayList<Object> datos_trabajadores_query = new ArrayList<>();
+
+                                            //Recorre la lista de trabajadores de la base de datos
+                                            //Por cada una, se crea una lista para añadir sus campos, y se añade a la lista inicial que se envía
+                                            //al cliente.
+                                            for (Usuario u : trabajadores) {
+
+                                                ArrayList<Object> campos = new ArrayList<>();
+                                                campos.add(u.getNombre());
+                                                campos.add(u.getCorreo());
+                                                campos.add(u.getPassw());
+                                                
+
+                                                datos_trabajadores_query.add(campos);
+
+                                            }
+
+                                            Message respuesta_trabajadores_query = new Message("ESTABLECIMIENTO", "GET_TRABAJADORES", datos_trabajadores_query);
+                                            out.writeObject(respuesta_trabajadores_query);
+                                            System.out.println(datos_trabajadores_query);
+                                        }
+
+                                    break;    
 
                                 }
 
@@ -813,6 +902,31 @@ public class HiloCliente implements Runnable {
                                         }
 
                                         break;
+                                        
+                                    case "BORRAR":
+                                        
+                                        synchronized (this) {
+
+                                            String productoBorrar = (String) peticion.getData().get(0);
+                                            String establProductoBorrar = (String) peticion.getData().get(1);
+
+                                            boolean resultadoBorrarProducto = conexion.borrarProducto(productoBorrar,establProductoBorrar);
+                                            //Ejecución sin productoBorrar
+                                            if (resultadoBorrarProducto) {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(true);
+                                                Message respuesta_delete = new Message("PRODUCTO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_delete);
+
+                                            } else {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(false);
+                                                Message respuesta_insert = new Message("PRODUCTO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_insert);
+                                            }
+                                        }
+
+                                        break;    
 
                                 }
 
@@ -831,7 +945,7 @@ public class HiloCliente implements Runnable {
                                             ArrayList<LineaPedido> lineasPedidos = conexion.getLineaPedidos(establecimiento);
 
                                             //Lista de "LineaPedido"
-                                            ArrayList<Object> datos_pedidos_query = new ArrayList<Object>();
+                                            ArrayList<Object> datos_pedidos_query = new ArrayList<>();
 
                                             //Recorre la lista de líneas de pedidos de la base de datos
                                             //Por cada una, se crea una lista para añadir sus campos, y se añade a la lista inicial que se envía
@@ -839,9 +953,9 @@ public class HiloCliente implements Runnable {
                                             for (LineaPedido p : lineasPedidos) {
 
                                                 ArrayList<Object> camposLinea = new ArrayList<>();
-                                                camposLinea.add(p.getPedido());
-                                                camposLinea.add(p.getCliente());
-                                                camposLinea.add(p.getProducto());
+                                                camposLinea.add(p.getPedido().getId());
+                                                camposLinea.add(p.getCliente().getNombre());
+                                                camposLinea.add(p.getProducto().getNombre());
                                                 camposLinea.add(p.getCantidad());
                                                 camposLinea.add(p.getEstado());
 
@@ -851,9 +965,10 @@ public class HiloCliente implements Runnable {
 
                                             Message respuesta_pedidos_query = new Message("PEDIDO", "GET_PEDIDOS", datos_pedidos_query);
                                             out.writeObject(respuesta_pedidos_query);
+                                            System.out.println(datos_pedidos_query);
                                         }
 
-                                        break;
+                                    break;
                                     
                                 }
                                 
