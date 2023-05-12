@@ -19,7 +19,8 @@ import java.util.Timer;
 public class Server {
 
     private static final int PUERTO = 4444;
-    private static List<HiloCliente> listaClientes = new ArrayList<>();
+    private static List<HiloCliente> listaClientes = new ArrayList<>(); //Usuarios conectados
+    private static List<SesionCliente> sesiones = new ArrayList<>(); //Sesiones de clientes abiertas
     private static int contadorNuevosClientes = 0;
 
     public static void main(String[] args) {
@@ -62,6 +63,26 @@ public class Server {
     //Devuelve el listado de hilos de clientes activos
     public static synchronized List<HiloCliente> getListaClientes(){
         return listaClientes;
+    }
+    
+    //Agrega una sesión de cliente a la lista
+    public static synchronized void agregarSesion(SesionCliente sesionCliente) {
+        sesiones.add(sesionCliente);
+    }
+
+    //Elimina una sesión de cliente de la lista
+    public static synchronized void eliminarSesion(SesionCliente sesionCliente) {
+        sesiones.remove(sesionCliente);
+    }
+    
+    //Muestra el número de sesiones activas
+    public static synchronized void mostrarSesiones(){
+        System.out.println("Num Sesiones: "+sesiones.size());
+    }
+    
+    //Devuelve el listado de sesiones de clientes activas
+    public static synchronized List<SesionCliente> getSesiones(){
+        return sesiones;
     }
 
     //Devuelve el contador de clientes nuevos

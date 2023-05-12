@@ -7,6 +7,7 @@ package bdd;
 import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.LineaPedido;
+import entidades.Pedido;
 import entidades.Producto;
 import entidades.Rol;
 import entidades.Usuario;
@@ -19,6 +20,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1020,6 +1022,41 @@ public class Conexion implements DAO {
         return listaProductos;
         
     }
+    
+    @Override
+    public ArrayList<Producto> getProductos(String establecimiento,String categoria) {
+        
+        ArrayList<Producto> listaProductos = new ArrayList<>();
+
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+        String query = "SELECT p FROM Producto p JOIN p.categorias c WHERE p.establecimiento.nombre = :nombreEstabl "
+                + "and c.nombre = :nombreCategoria";
+
+        TypedQuery<Producto> tq = em.createQuery(query, Producto.class);
+        tq.setParameter("nombreEstabl", establecimiento);
+        tq.setParameter("nombreCategoria", categoria);
+
+        List<Producto> productos = null;
+        try {
+
+            productos = tq.getResultList();
+
+            for (Producto p : productos) {
+
+                listaProductos.add(p);
+
+            }
+
+        } catch (NoResultException ex) {
+            addExcepcion(ex);
+        } finally {
+            em.close();
+        }
+
+        return listaProductos;
+        
+    }
 
     @Override
     public Producto getProducto(String nombreProducto, String establecimientoProducto) {
@@ -1319,6 +1356,42 @@ public class Conexion implements DAO {
         }
         
         return exito;
+        
+    }
+
+    @Override
+    public Pedido crearPedido(String fecha,Usuario cliente, Establecimiento establ) {
+        
+        EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+        EntityTransaction tx = null;
+
+        Pedido pedido = null;
+        SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+        Date fechaDate = null;
+
+        try {
+
+            fechaDate = formato.parse(fecha);
+            System.out.println(fecha);
+        
+            pedido = new Pedido(fechaDate, cliente, establ);
+
+            tx = em.getTransaction();
+            tx.begin();
+            em.persist(pedido);
+            tx.commit();
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+                e.printStackTrace();
+                addExcepcion(e);
+            }
+        } finally {
+            em.close();
+        }
+
+        return pedido;
         
     }
 

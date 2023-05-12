@@ -8,6 +8,7 @@ package bdd;
 import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.LineaPedido;
+import entidades.Pedido;
 import entidades.Producto;
 import entidades.Usuario;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public interface DAO {
     
     public Producto getProducto(String nombreProducto,String establecimientoProducto);
     public ArrayList<Producto> getProductos(String establecimiento);
+    public ArrayList<Producto> getProductos(String establecimiento,String categoria);
     
     public ArrayList<LineaPedido> getLineaPedidos(String establecimiento);
     
@@ -77,4 +79,10 @@ public interface DAO {
     
     public boolean insertarCategoria(String nombre, String descripcion, Establecimiento establecimiento);
     public boolean insertarProducto(String nombre, String descripcion, double precio,int stockInicial, byte[] imagen,ArrayList<String> categorias,Establecimiento establecimiento);
+
+    //PEDIDOS
+    public Pedido crearPedido(String fecha,Usuario cliente, Establecimiento establ);
+
+
+
 }

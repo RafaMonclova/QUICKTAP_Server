@@ -553,3 +553,31 @@
 [09:36:34]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [09:36:44]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [09:36:44]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[03:04:47]No entity found for query
+[03:45:33]No entity found for query
+[03:45:36]No entity found for query
+[03:49:26]No entity found for query
+[04:01:53]No entity found for query
+[04:01:58]No entity found for query
+[05:43:43]No entity found for query
+[05:43:47]No entity found for query
+[05:44:50]No entity found for query
+[05:46:10]No entity found for query
+[05:59:28]No entity found for query
+[06:02:17]No entity found for query
+[06:10:06]No entity found for query
+[06:12:44]No entity found for query
+[06:19:33]No entity found for query
+[06:22:29]No entity found for query
+[06:24:35]No entity found for query
+[06:26:16]No entity found for query
+[06:27:53]No entity found for query
+[06:30:37]No entity found for query
+[06:47:00]No entity found for query
+[06:26:49]No entity found for query
+[10:15:50]No entity found for query
+[10:15:53]No entity found for query
+[11:44:40]No entity found for query
+[07:14:52]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:14:52]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:27:49]No entity found for query

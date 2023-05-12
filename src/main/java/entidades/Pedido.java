@@ -56,10 +56,10 @@ public class Pedido  implements Serializable {
     public Pedido() {
     }
 
-    public Pedido(Date fecha, Usuario clientePide, Usuario trabajadorPrepara) {
+    public Pedido(Date fecha, Usuario clientePide, Establecimiento establecimiento) {
         this.fecha = fecha;
         this.clientePide = clientePide;
-        this.trabajadorPrepara = trabajadorPrepara;
+        this.establecimiento = establecimiento;
     }
    
     public int getId() {
