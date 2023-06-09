@@ -16,6 +16,7 @@
         <class>entidades.Categoria</class>
         <class>entidades.LineaPedido</class>
         <class>entidades.Pedido</class>
+        <class>entidades.Amistad</class>
         <properties>
             <!-- Driver for DB database -->
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />

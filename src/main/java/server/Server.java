@@ -5,8 +5,10 @@
  */
 package server;
 
+import entidades.Rol;
 import utilidades.CounterResetTask;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDate;
@@ -30,10 +32,11 @@ public class Server {
 
             //Inicializa la tarea de comprobación, que reiniciará el contador de nuevos clientes a las 0:00
             iniciarContador();
-
+            
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress().getHostAddress());
+                
                 HiloCliente hiloCliente = new HiloCliente(clientSocket);
                 Thread thread = new Thread(hiloCliente);
                 thread.start();
@@ -53,6 +56,19 @@ public class Server {
     //Elimina un hilo de cliente de la lista
     public static synchronized void eliminarHiloCliente(HiloCliente hiloCliente) {
         listaClientes.remove(hiloCliente);
+        
+        //Busca si es invitado de alguna sesión, y lo borra del listado de invitados
+        for(SesionCliente sesion : getSesiones()){
+            
+            if(sesion.getInvitados().contains(hiloCliente)){
+                
+                sesion.getInvitados().remove(hiloCliente);
+                break;
+                
+            }
+            
+        }
+        
     }
     
     //Muestra el número de clientes activos

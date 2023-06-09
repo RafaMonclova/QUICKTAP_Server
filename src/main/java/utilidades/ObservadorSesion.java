@@ -4,10 +4,12 @@
  */
 package utilidades;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author rafam
  */
 public interface ObservadorSesion {
-    void actualizar();
+    void actualizarPedidos(ArrayList<Object> lineasPedido);
 }

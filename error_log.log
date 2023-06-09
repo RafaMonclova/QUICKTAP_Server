@@ -581,3 +581,470 @@
 [07:14:52]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [07:14:52]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
 [06:27:49]No entity found for query
+[06:48:40]No entity found for query
+[06:31:13]No entity found for query
+[06:34:11]No entity found for query
+[06:35:47]No entity found for query
+[06:36:01]No entity found for query
+[06:36:13]No entity found for query
+[06:39:53]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:40:07]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:40:35]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:41:23]No entity found for query
+[06:41:23]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[06:44:27]org.hibernate.exception.DataException: could not execute statement
+[06:44:40]org.hibernate.exception.DataException: could not execute statement
+[06:45:47]org.hibernate.exception.DataException: could not execute statement
+[06:46:30]org.hibernate.exception.DataException: could not execute statement
+[06:49:26]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:51:14]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:52:02]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:52:27]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:52:47]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:53:30]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:53:43]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:53:56]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[06:55:52]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:00:12]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:00:58]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:01:26]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:03:59]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:04:28]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:08:48]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:09:25]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:09:50]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:09:54]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:10:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:10:29]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:11:40]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:11:40]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:11:43]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:11:43]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:12:31]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:20:33]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:20:33]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:20:59]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:21:08]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[07:22:29]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:22:29]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:57:33]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:57:33]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:57:35]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:57:35]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:58:39]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:58:39]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:03]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:03]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:06]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:06]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:58]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[07:59:58]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:06:24]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:06:24]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:06:26]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:06:26]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:08:03]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:08:03]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:14]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:14]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:16]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:16]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:51]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:11:51]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:14:42]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:14:42]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:15:58]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:15:58]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:16:06]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:16:06]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:18:11]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[08:18:15]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[12:20:19]No entity found for query
+[12:22:42]No entity found for query
+[12:34:13]No entity found for query
+[01:31:59]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[01:31:59]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:23:19]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:23:19]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:23:21]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:23:21]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[01:44:39]No entity found for query
+[01:44:39]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[01:47:00]No entity found for query
+[01:47:00]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[01:47:08]No entity found for query
+[01:47:08]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:19:11]No entity found for query
+[02:19:11]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:24:15]No entity found for query
+[02:24:15]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:27:28]No entity found for query
+[02:27:28]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:35:33]No entity found for query
+[09:35:33]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:44:56]No entity found for query
+[09:44:56]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:00:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:10:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:12:45]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:17:28]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:04:47]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:04:57]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:27:39]No entity found for query
+[02:27:39]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:27:39]No entity found for query
+[02:29:02]No entity found for query
+[02:29:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:29:02]No entity found for query
+[02:30:42]No entity found for query
+[02:30:42]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:30:48]No entity found for query
+[02:30:48]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:31:56]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:34:43]No entity found for query
+[02:34:43]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:35:31]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:37:57]No entity found for query
+[02:37:57]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:38:28]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:43:02]No entity found for query
+[02:43:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:43:14]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:44:30]No entity found for query
+[02:44:30]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:44:37]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:52:14]No entity found for query
+[02:52:14]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:52:22]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:59:18]No entity found for query
+[02:59:18]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[02:59:29]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[03:00:13]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[03:00:16]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[03:10:16]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:30:22]No entity found for query
+[04:30:22]No entity found for query
+[04:30:22]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:30:39]No entity found for query
+[04:30:39]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:31:28]No entity found for query
+[04:31:28]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:33:40]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:41:03]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:42:52]No entity found for query
+[04:42:53]No entity found for query
+[04:42:53]No entity found for query
+[04:42:53]No entity found for query
+[04:42:53]No entity found for query
+[04:42:53]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:42:56]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:43:14]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:46:35]No entity found for query
+[04:46:35]No entity found for query
+[04:46:35]No entity found for query
+[04:46:35]No entity found for query
+[04:47:10]No entity found for query
+[04:47:27]No entity found for query
+[04:47:27]No entity found for query
+[04:47:27]No entity found for query
+[04:47:27]No entity found for query
+[04:47:31]No entity found for query
+[04:48:47]No entity found for query
+[04:48:47]No entity found for query
+[04:48:47]No entity found for query
+[04:48:47]No entity found for query
+[04:48:58]No entity found for query
+[04:57:04]No entity found for query
+[04:57:04]No entity found for query
+[04:57:04]No entity found for query
+[04:57:04]No entity found for query
+[04:57:40]No entity found for query
+[04:57:47]No entity found for query
+[04:57:47]No entity found for query
+[04:57:47]No entity found for query
+[04:57:47]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]No entity found for query
+[05:04:53]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[05:04:56]No entity found for query
+[05:04:56]No entity found for query
+[05:04:56]No entity found for query
+[05:04:56]No entity found for query
+[05:05:08]No entity found for query
+[05:05:08]No entity found for query
+[05:05:08]No entity found for query
+[05:05:08]No entity found for query
+[05:05:21]No entity found for query
+[05:05:21]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]No entity found for query
+[05:05:24]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[05:05:28]No entity found for query
+[05:05:28]No entity found for query
+[05:05:37]No entity found for query
+[05:05:37]No entity found for query
+[05:05:37]No entity found for query
+[05:05:37]No entity found for query
+[05:06:15]No entity found for query
+[05:06:31]No entity found for query
+[05:06:31]No entity found for query
+[05:06:31]No entity found for query
+[05:06:31]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]No entity found for query
+[09:10:11]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:10:20]No entity found for query
+[09:10:20]No entity found for query
+[09:10:20]No entity found for query
+[09:10:20]No entity found for query
+[09:37:23]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]No entity found for query
+[04:54:02]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[04:54:06]No entity found for query
+[04:54:06]No entity found for query
+[04:54:06]No entity found for query
+[04:54:06]No entity found for query
+[05:39:01]No entity found for query
+[05:39:01]No entity found for query
+[05:39:01]No entity found for query
+[05:39:01]No entity found for query
+[09:21:18]No entity found for query
+[09:21:18]No entity found for query
+[09:21:18]No entity found for query
+[09:21:18]No entity found for query
+[09:22:48]No entity found for query
+[09:22:48]No entity found for query
+[09:22:48]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[11:10:27]No entity found for query
+[11:10:27]No entity found for query
+[11:10:27]No entity found for query
+[11:10:27]No entity found for query
+[11:10:42]No entity found for query
+[11:10:42]No entity found for query
+[11:10:42]No entity found for query
+[11:10:42]No entity found for query
+[09:14:00]No entity found for query
+[09:14:00]No entity found for query
+[09:14:00]No entity found for query
+[09:14:00]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]No entity found for query
+[09:18:41]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:18:48]No entity found for query
+[09:18:48]No entity found for query
+[09:18:48]No entity found for query
+[09:18:48]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]No entity found for query
+[09:49:15]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]No entity found for query
+[09:49:19]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:49:35]No entity found for query
+[09:49:35]No entity found for query
+[09:49:35]No entity found for query
+[09:49:35]No entity found for query
+[09:49:54]No entity found for query
+[09:49:54]No entity found for query
+[09:49:54]No entity found for query
+[09:49:54]No entity found for query
+[09:52:42]No entity found for query
+[09:52:42]No entity found for query
+[09:52:48]No entity found for query
+[09:52:48]No entity found for query
+[05:01:59]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:05:17]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[05:08:30]org.hibernate.exception.GenericJDBCException: could not execute statement
+[05:11:04]org.hibernate.exception.GenericJDBCException: could not execute statement
+[05:12:46]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:14:11]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:19:15]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:25:53]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:28:29]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:29:16]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:30:30]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:32:45]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:43:44]Cannot invoke "java.util.List.addAll(java.util.Collection)" because the return value of "entidades.Pedido.getLineasPedido()" is null
+[05:45:59]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[05:47:27]org.hibernate.exception.GenericJDBCException: could not execute statement
+[05:51:57]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:55:34]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:57:05]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[05:59:06]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.LineaPedido
+[02:09:07]org.hibernate.PersistentObjectException: detached entity passed to persist: entidades.Pedido
+[11:02:21]No entity found for query
+[11:03:40]No entity found for query
+[11:16:57]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[11:37:29]No entity found for query
+[11:37:29]No entity found for query
+[11:37:29]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[09:30:32]No entity found for query
+[06:02:46]No entity found for query
+[06:05:00]No entity found for query
+[10:33:27]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[10:34:23]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:34:25]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:34:30]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[10:36:15]org.hibernate.exception.DataException: could not execute statement
+[10:52:12]No entity found for query
+[11:20:30]No entity found for query
+[07:13:22]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[08:05:38]No entity found for query
+[08:05:38]No entity found for query
+[08:05:38]No entity found for query
+[08:05:38]No entity found for query
+[08:05:38]No entity found for query
+[08:05:39]No entity found for query
+[08:05:39]No entity found for query
+[08:05:39]No entity found for query
+[08:05:39]No entity found for query
+[08:05:39]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[08:05:49]No entity found for query
+[08:05:49]No entity found for query
+[08:05:49]No entity found for query
+[08:05:49]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]No entity found for query
+[09:03:00]org.hibernate.exception.ConstraintViolationException: could not execute statement
+[01:48:02]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[01:49:27]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[05:55:57]No entity found for query
+[05:55:57]No entity found for query
+[05:56:44]No entity found for query
+[05:56:44]No entity found for query
+[05:56:46]No entity found for query
+[05:56:46]No entity found for query
+[05:56:50]No entity found for query
+[05:56:50]No entity found for query
+[05:56:52]No entity found for query
+[05:56:52]No entity found for query
+[05:58:40]No entity found for query
+[05:58:40]No entity found for query
+[05:58:44]No entity found for query
+[05:58:44]No entity found for query
+[06:01:31]No entity found for query
+[06:01:31]No entity found for query
+[06:03:30]No entity found for query
+[06:03:30]No entity found for query
+[06:09:28]No entity found for query
+[06:09:28]No entity found for query
+[06:12:06]No entity found for query
+[06:12:06]No entity found for query
+[06:12:23]No entity found for query
+[06:12:23]No entity found for query
+[08:36:18]No entity found for query
+[09:05:37]No entity found for query
+[09:05:37]No entity found for query
+[10:26:43]No entity found for query
+[10:26:43]No entity found for query
+[10:28:11]No entity found for query
+[10:28:11]No entity found for query
+[10:30:16]No entity found for query
+[10:30:16]No entity found for query
+[10:30:18]No entity found for query
+[10:30:18]No entity found for query
+[10:30:34]No entity found for query
+[10:30:34]No entity found for query
+[10:30:35]No entity found for query
+[10:30:35]No entity found for query
+[11:51:45]No entity found for query
+[11:51:45]No entity found for query
+[12:03:48]No entity found for query
+[12:03:48]No entity found for query
+[12:04:07]No entity found for query
+[12:04:07]No entity found for query
+[12:04:21]No entity found for query
+[12:04:21]No entity found for query
+[12:04:25]No entity found for query
+[12:04:25]No entity found for query
+[12:14:34]No entity found for query
+[12:14:34]No entity found for query
+[12:36:26]No entity found for query
+[12:36:26]No entity found for query
+[11:56:01]No entity found for query
+[11:57:01]No entity found for query
+[12:01:13]No entity found for query
+[01:46:40]No entity found for query
+[01:46:40]No entity found for query
+[01:47:10]No entity found for query
+[01:48:08]No entity found for query
+[01:49:59]No entity found for query
+[01:49:59]No entity found for query
+[02:09:07]No entity found for query
+[04:37:33]No entity found for query
+[04:41:19]No entity found for query
+[05:03:50]No entity found for query
+[05:07:26]No entity found for query
+[05:13:25]No entity found for query
+[05:36:18]No entity found for query
+[05:39:58]No entity found for query
+[05:39:59]No entity found for query
+[05:46:06]No entity found for query
+[06:35:00]No entity found for query
+[06:35:25]No entity found for query
+[08:00:51]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[08:01:06]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[08:02:39]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[08:02:44]org.hibernate.exception.SQLGrammarException: could not extract ResultSet
+[09:10:40]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:10:40]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:11:24]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:11:24]Cannot invoke "java.lang.Double.doubleValue()" because the return value of "org.hibernate.Query.getSingleResult()" is null
+[09:24:38]No entity found for query

@@ -15,22 +15,19 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class LineaPedidoId implements Serializable {
-
-    //private static final long serialVersionUID = 1L;
-
+    
+    @Column(name = "id_lineaPedido")
+    private int idLineaPedido;
+    
     @Column(name = "id_pedido")
     private int idPedido;
 
-    @Column(name = "id_producto")
-    private int idProducto;
-
-    public LineaPedidoId(int idPedido, int idProducto) {
-        this.idPedido = idPedido;
-        this.idProducto = idProducto;
+    public int getIdLineaPedido() {
+        return idLineaPedido;
     }
-    
-    public LineaPedidoId(){
-        
+
+    public void setIdLineaPedido(int idLineaPedido) {
+        this.idLineaPedido = idLineaPedido;
     }
 
     public int getIdPedido() {
@@ -41,25 +38,31 @@ public class LineaPedidoId implements Serializable {
         this.idPedido = idPedido;
     }
 
-    public int getIdProducto() {
-        return idProducto;
+    public LineaPedidoId(int idLineaPedido, int idPedido) {
+        this.idLineaPedido = idLineaPedido;
+        this.idPedido = idPedido;
+    }
+    
+    public LineaPedidoId(){
+        
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
-    }
-
+    // Métodos equals() y hashCode() para comparación y uso en colecciones
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LineaPedidoId)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+
         LineaPedidoId that = (LineaPedidoId) o;
-        return Objects.equals(idPedido, that.idPedido) &&
-                Objects.equals(idProducto, that.idProducto);
+
+        if (idLineaPedido != that.idLineaPedido) return false;
+        return idPedido == that.idPedido;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idPedido, idProducto);
+        int result = idLineaPedido;
+        result = 31 * result + idPedido;
+        return result;
     }
 }

@@ -5,6 +5,7 @@
 package bdd;
 
 
+import entidades.Amistad;
 import entidades.Categoria;
 import entidades.Establecimiento;
 import entidades.LineaPedido;
@@ -33,6 +34,9 @@ public interface DAO {
     public ArrayList<String> getEstablecimientos();
     public ArrayList<String> getEstablecimientos(String usuario);
     
+    //Establecimientos cercanos
+    public ArrayList<Object> getEstablecimientos(double latitud, double longitud, double radio);
+    
     public ArrayList<Usuario> getUsuarios(String rol);
     public ArrayList<Categoria> getCategorias(String establecimiento);
     
@@ -42,11 +46,13 @@ public interface DAO {
     
     public ArrayList<LineaPedido> getLineaPedidos(String establecimiento);
     
+    public Pedido getPedido(int id);
+    
     public ArrayList<Usuario> getTrabajadores(String establecimiento);
     
     public Set convertToRoleSet(ArrayList<String> roles);
     
-    public boolean insertarEstabl(String nombre, String direccion, String coords);
+    public boolean insertarEstabl(String nombre, String direccion, String latitud, String longitud);
     public Set convertEstabl(ArrayList<String> establecimientos);
     public Set convertCategorias(ArrayList<String> categorias);
     
@@ -82,7 +88,21 @@ public interface DAO {
 
     //PEDIDOS
     public Pedido crearPedido(String fecha,Usuario cliente, Establecimiento establ);
+    public boolean insertarLineasPedido(ArrayList<LineaPedido> lineasAPagar);
+    public boolean actualizarLineaPedido(LineaPedido lineaPedido);
+    public ArrayList<Object> getLineasEstado(String estado);
+    public ArrayList<Object> getLineasEstablecimiento(Establecimiento establecimiento,String estado);
+    public boolean insertarParticipantes(Pedido pedido, ArrayList<Usuario> participantes);
+    public LineaPedido getLineaPedido(int idLinea, int idPedido);
 
+    //AMIGOS
+    public ArrayList<Object> getAmigos(String usuario);
+    public ArrayList<Object> getSolicitudesPendientes(String usuario);
+    public ArrayList<Object> getSolicitudesEnviadas(String usuario);
+    
+    public int añadirAmigo(Usuario usuario, String amigo, String estado,String tipoSolicitud);
+    public boolean cambiarEstadoSolicitud(Usuario amigo, Usuario usuario, boolean aceptarRechazar);
+    public void borrarAmistad(Usuario usuario, Usuario amigo);
 
 
 }

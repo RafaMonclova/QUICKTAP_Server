@@ -5,6 +5,7 @@
 package entidades;
 
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 import javax.persistence.Table;
 
 @Entity
@@ -23,12 +25,22 @@ public class LineaPedido implements Serializable{
     @EmbeddedId
     private LineaPedidoId id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_pedido", insertable = false, updatable = false)
+    /*
+    @Id
+    @Column(name = "id_lineaPedido")
+    private int id;*/
+    
+    //@ManyToOne
+    //@JoinColumn(name = "id_pedido")
+    //private Pedido pedido;
+    
+    @ManyToOne
+    @MapsId("idPedido") // Mapeo de la parte de la clave compuesta correspondiente a id_pedido
+    @JoinColumn(name = "id_pedido")
     private Pedido pedido;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_producto", insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_producto")
     private Producto producto;
 
     @ManyToOne
@@ -40,6 +52,9 @@ public class LineaPedido implements Serializable{
     
     @Column(name = "estado")
     private String estado;
+    
+    @Column(name = "codRecogida")
+    private int codigoRecogida;
 
     public LineaPedido(){
         
@@ -99,6 +114,14 @@ public class LineaPedido implements Serializable{
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public int getCodigoRecogida() {
+        return codigoRecogida;
+    }
+
+    public void setCodigoRecogida(int codigoRecogida) {
+        this.codigoRecogida = codigoRecogida;
     }
     
     

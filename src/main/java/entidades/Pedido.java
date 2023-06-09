@@ -3,8 +3,10 @@ package entidades;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -51,6 +53,9 @@ public class Pedido  implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
     private Establecimiento establecimiento;
+    
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LineaPedido> lineasPedido = new HashSet();
      
 
     public Pedido() {
@@ -60,6 +65,7 @@ public class Pedido  implements Serializable {
         this.fecha = fecha;
         this.clientePide = clientePide;
         this.establecimiento = establecimiento;
+
     }
    
     public int getId() {
@@ -115,6 +121,15 @@ public class Pedido  implements Serializable {
         this.establecimiento = establecimiento;
     }
 
+    public Set<LineaPedido> getLineasPedido() {
+        return lineasPedido;
+    }
+
+    public void setLineasPedido(Set<LineaPedido> lineasPedido) {
+        this.lineasPedido = lineasPedido;
+    }
+    
+    
     
 }
 

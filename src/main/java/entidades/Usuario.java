@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
@@ -53,6 +54,11 @@ public class Usuario implements Serializable {
             
     )
     private Set<Establecimiento> establecimientos = new HashSet();
+    
+    
+    @OneToMany(mappedBy = "usuario",orphanRemoval = true,fetch = FetchType.EAGER)
+    private Set<Amistad> amigos = new HashSet();
+    
 
     public Usuario() {
     }
@@ -109,6 +115,22 @@ public class Usuario implements Serializable {
 
     public void setEstablecimientos(Set<Establecimiento> establecimientos) {
         this.establecimientos = establecimientos;
+    }
+
+    public Set<Amistad> getAmigos() {
+        return amigos;
+    }
+
+    public void setAmigos(Set<Amistad> amigos) {
+        this.amigos = amigos;
+    }
+    
+    public void añadirAmigo(Amistad amistad){
+        amigos.add(amistad);
+    }
+    
+    public void borrarAmigo(Amistad amistad){
+        amigos.remove(amistad);
     }
     
     public String toString(){

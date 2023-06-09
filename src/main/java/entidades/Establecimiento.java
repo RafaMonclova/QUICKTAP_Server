@@ -33,8 +33,14 @@ public class Establecimiento  implements Serializable {
     @Column(name = "direccion")
     private String direccion;
     
-    @Column(name = "coordenadas")
-    private String coordenadas;
+//    @Column(name = "localidad")
+//    private String localidad;
+    
+    @Column(name = "latitud")
+    private double latitud;
+    
+    @Column(name = "longitud")
+    private double longitud;
     
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Producto> productos = new HashSet<>();
@@ -52,10 +58,12 @@ public class Establecimiento  implements Serializable {
     }
 
 	
-    public Establecimiento(String nombre, String direccion, String coordenadas) {
+    public Establecimiento(String nombre, String direccion, double latitud, double longitud) {
         this.nombre = nombre;
         this.direccion = direccion;
-        this.coordenadas = coordenadas;
+        //this.localidad = localidad;
+        this.latitud = latitud;
+        this.longitud = longitud;
     }
    
    
@@ -80,12 +88,29 @@ public class Establecimiento  implements Serializable {
     public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
-    public String getCoordenadas() {
-        return this.coordenadas;
+
+//    public String getLocalidad() {
+//        return localidad;
+//    }
+//
+//    public void setLocalidad(String localidad) {
+//        this.localidad = localidad;
+//    }
+    
+    
+    public double getLatitud() {
+        return this.latitud;
     }
     
-    public void setCoordenadas(String coordenadas) {
-        this.coordenadas = coordenadas;
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+    public double getLongitud() {
+        return this.longitud;
+    }
+    
+    public void setLongitud(double longitud) {
+        this.longitud = longitud;
     }
 
     public Set<Categoria> getCategorias() {
