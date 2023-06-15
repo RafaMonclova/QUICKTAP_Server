@@ -4,7 +4,6 @@
  */
 package server;
 
-import utilidades.ObservadorSesion;
 import entidades.LineaPedido;
 import entidades.LineaPedidoId;
 import entidades.Pedido;
@@ -17,16 +16,15 @@ import java.util.logging.Logger;
 import message.Message;
 
 /**
- *
+ * Clase para la creación de sesiones de clientes en memoria
  * @author rafam
  */
 public class SesionCliente {
 
-    private Pedido pedidoSesion;
-    private Usuario clienteAnfitrion;
-    private List<HiloCliente> invitados;
-    private List<LineaPedido> lineasDePedido;
-    private int codigoSesion;
+    private Pedido pedidoSesion; //Pedido de la sesión
+    private Usuario clienteAnfitrion; //Cliente creador de la sesión
+    private List<HiloCliente> invitados; //Colección de invitados de la sesión
+    private List<LineaPedido> lineasDePedido; //Líneas de pedido en la sesión
     private int contadorId; //Contador con los id de cada linea (para inserción en la BDD)
 
     public SesionCliente(Usuario clienteAnfitrion, Pedido pedidoSesion) {
@@ -34,42 +32,25 @@ public class SesionCliente {
         this.pedidoSesion = pedidoSesion;
         this.lineasDePedido = new ArrayList<>();
         invitados = new ArrayList<>();
-        contadorId = 1;
+        contadorId = 1; //Empieza el contador en 1
         
-        int aleatorio = generarNumeroAleatorio();
-        
-        while(existeNumSesion(aleatorio)){
-            aleatorio = generarNumeroAleatorio();
-        }
-        
-        codigoSesion = aleatorio;
-        System.out.println(codigoSesion);
         
     }
 
+    /**
+     * Genera un número aleatorio de 4 dígitos
+     * @return Devuelve el número generado
+     */
     public int generarNumeroAleatorio() {
         Random rand = new Random();
         int numero = rand.nextInt(9000) + 1000;
         return numero;
     }
-    
-    public boolean existeNumSesion(int aleatorio){
-        
-        boolean aparece = false;
-        
-        for(SesionCliente sesion : Server.getSesiones()){
-            
-            if(sesion.getCodigoSesion() == aleatorio){
-                aparece = true;
-                break;
-            }
-            
-        }
-        
-        return aparece;
-        
-    }
 
+    /**
+     * Convierte la lista de líneas de pedido de la sesión a lista de Object
+     * @return Devuelve la lista como lista de Object
+     */
     public ArrayList<Object> convertirLista() {
         ArrayList<Object> listaNueva = new ArrayList<>();
 
@@ -101,7 +82,8 @@ public class SesionCliente {
         return listaNueva;
 
     }
-
+    
+    //Getters y setters
     public Pedido getPedidoSesion() {
         return pedidoSesion;
     }
@@ -127,10 +109,6 @@ public class SesionCliente {
         notificarPedidos();
     }
     
-    public int getCodigoSesion(){
-        return codigoSesion;
-    }
-
     public List<HiloCliente> getInvitados() {
         return invitados;
     }
@@ -139,6 +117,10 @@ public class SesionCliente {
         this.invitados = invitados;
     }
     
+    /**
+     * Devuelve una lista de objetos Usuario de los invitados de la sesión
+     * @return La lista de objetos Usuario
+     */
     public ArrayList<Usuario> getUsuariosInvitados(){
         
         ArrayList<Usuario> usuarios = new ArrayList<>();
@@ -151,6 +133,11 @@ public class SesionCliente {
         
     }
     
+    /**
+     * Comprueba si el cliente ya pertenece a la sesión
+     * @param cliente El cliente a comprobar
+     * @return Devuelve un boolean indicando si pertenece a la sesión
+     */
     public boolean apareceCliente(String cliente){
         
         boolean aparece = false;
@@ -168,14 +155,26 @@ public class SesionCliente {
         
     }
 
+    /**
+     * Añade un cliente a la sesión
+     * @param invitado El hilo del cliente a añadir
+     */
     public synchronized void añadirInvitado(HiloCliente invitado) {
         invitados.add(invitado);
     }
     
+    /**
+     * Elimina un cliente de la sesión
+     * @param invitado El hilo del cliente a eliminar
+     */
     public synchronized void eliminarInvitado(HiloCliente invitado) {
         invitados.remove(invitado);
     }
 
+    /**
+     * Añade nuevas líneas de pedido a la colección de la sesión, y notifica a los invitados
+     * @param lineaDePedido La lista de líneas de pedido a añadir
+     */
     public synchronized void agregarLineasPedido(ArrayList<LineaPedido> lineaDePedido) {
 
         for (LineaPedido lp : lineaDePedido) {
@@ -188,6 +187,10 @@ public class SesionCliente {
 
     }
     
+    /**
+     * Elimina una línea de pedido de la sesión, y notifica a los invitados
+     * @param lineaPedido La línea de pedido a eliminar
+     */
     public synchronized void eliminarLineaPedido(LineaPedido lineaPedido){
         
         System.out.println(lineasDePedido.size());
@@ -203,22 +206,14 @@ public class SesionCliente {
             
         }
         
-        System.out.println(lineasDePedido.size());
         notificarPedidos();
         
     }
     
-    /*
-    public synchronized void setLineasPedido(ArrayList<LineaPedido> lineaDePedido){
-        
-        lineasDePedido = lineaDePedido;
-        notificarPedidos();
-        
-        
-    }
-*/
-    
-    
+    /**
+     * Actualiza las cantidades de las líneas de pedido de la sesión, y notifica a los invitados
+     * @param nuevasCantidades La lista con las nuevas cantidades
+     */
     public synchronized void actualizarCantidades(ArrayList<Integer> nuevasCantidades){
         
         for (int i = 0; i < lineasDePedido.size(); i++) {
@@ -231,14 +226,18 @@ public class SesionCliente {
         
     }
     
-    
+    /**
+     * Notifica a los hilos de cliente invitados con la lista de líneas de pedido actualizada
+     */
     public synchronized void notificarPedidos() {
         for (HiloCliente observador : invitados) {
-            System.out.println("Observador: " + observador.getUsuario().getNombre());
             observador.actualizarPedidos(convertirLista());
         }
     }
     
+    /**
+     * Notifica a los invitados del cierre de la sesión
+     */
     public void notificarCierre(){
         
         for(HiloCliente cliente : invitados){
@@ -249,13 +248,13 @@ public class SesionCliente {
         
     }
     
+    /**
+     * El cliente recibido abandona la sesión
+     * @param cliente Hilo del cliente que abandona la sesión
+     */
     public void notificarCierre(HiloCliente cliente){
         
-        
-            
         cliente.salirSesion();
-            
-        
         
     }
     

@@ -18,44 +18,47 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Table;
 
+/**
+ * Clase para mapear la tabla linea_pedido
+ * @author rafam
+ */
 @Entity
 @Table(name = "linea_pedido")
 public class LineaPedido implements Serializable{
     
+    //Clave compuesta por id_lineaPedido e id_pedido
     @EmbeddedId
     private LineaPedidoId id;
-
-    /*
-    @Id
-    @Column(name = "id_lineaPedido")
-    private int id;*/
     
-    //@ManyToOne
-    //@JoinColumn(name = "id_pedido")
-    //private Pedido pedido;
-    
+    //Relación many to one con pedido
     @ManyToOne
     @MapsId("idPedido") // Mapeo de la parte de la clave compuesta correspondiente a id_pedido
     @JoinColumn(name = "id_pedido")
     private Pedido pedido;
 
+    //Relación many to one con producto
     @ManyToOne
     @JoinColumn(name = "id_producto")
     private Producto producto;
 
+    //Relación many to one con usuario (cliente)
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Usuario cliente;
     
+    //Columna cantidad
     @Column(name = "cantidad")
     private int cantidad;
     
+    //Columna estado
     @Column(name = "estado")
     private String estado;
     
+    //Columna codRecogida
     @Column(name = "codRecogida")
     private int codigoRecogida;
 
+    //Constructores
     public LineaPedido(){
         
     }
@@ -68,6 +71,7 @@ public class LineaPedido implements Serializable{
         this.estado = estado;
     }
 
+    //Getters y setters
     public LineaPedidoId getId() {
         return id;
     }

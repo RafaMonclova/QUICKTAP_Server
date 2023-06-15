@@ -10,18 +10,31 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- *
+ * Clave compuesta de la tabla linea_pedido
  * @author rafam
  */
 @Embeddable
 public class LineaPedidoId implements Serializable {
     
+    //Columna id_lineaPedido
     @Column(name = "id_lineaPedido")
     private int idLineaPedido;
     
+    //Columna id_pedido
     @Column(name = "id_pedido")
     private int idPedido;
-
+    
+    //Constructores
+    public LineaPedidoId(){
+        
+    }
+    
+    public LineaPedidoId(int idLineaPedido, int idPedido) {
+        this.idLineaPedido = idLineaPedido;
+        this.idPedido = idPedido;
+    }
+    
+    //Getters y setters
     public int getIdLineaPedido() {
         return idLineaPedido;
     }
@@ -38,16 +51,7 @@ public class LineaPedidoId implements Serializable {
         this.idPedido = idPedido;
     }
 
-    public LineaPedidoId(int idLineaPedido, int idPedido) {
-        this.idLineaPedido = idLineaPedido;
-        this.idPedido = idPedido;
-    }
-    
-    public LineaPedidoId(){
-        
-    }
-
-    // Métodos equals() y hashCode() para comparación y uso en colecciones
+    //Métodos equals() y hashCode() para comparación y uso en colecciones
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

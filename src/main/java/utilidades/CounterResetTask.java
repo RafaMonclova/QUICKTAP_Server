@@ -4,6 +4,11 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
+/**
+ * Clase para reiniciar el contador de clientes nuevos diarios
+ * @author rafam
+ */
 public class CounterResetTask extends TimerTask {
     private int contador = 0;
 
@@ -12,7 +17,7 @@ public class CounterResetTask extends TimerTask {
     }
     
     public void run() {
-        // Reiniciar el contador a cero si es medianoche
+        //Reiniciar el contador a cero si es medianoche
         Calendar now = Calendar.getInstance();
         if (now.get(Calendar.HOUR_OF_DAY) == 0 && now.get(Calendar.MINUTE) == 0) {
             contador = 0;

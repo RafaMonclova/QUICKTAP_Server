@@ -25,15 +25,18 @@ import java.net.Socket;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import message.Message;
-import utilidades.ObservadorSesion;
+import utilidades.SHA;
 
-public class HiloCliente implements Runnable, ObservadorSesion {
+public class HiloCliente implements Runnable {
 
     private static final int WAITING = 0; //Estado inicial. Acepta peticiones de logeo o salida
     private static final int RUNNING = 2; //Estado donde el usuario puede enviar peticiones al servidor para comunicarse con la BDD.
@@ -41,16 +44,17 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     private int estado;
 
-    private Socket socketCliente;
-    private Usuario usuario;
-    private Establecimiento establecimientoActual;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
+    private Socket socketCliente; //Socket del cliente
+    private Usuario usuario; //Usuario conectado
+    private Establecimiento establecimientoActual; //Establecimiento del usuario conectado
+    private ObjectOutputStream out; //Flijo de salida
+    private ObjectInputStream in; //Flujo de entrada
 
-    private SesionCliente sesion;
+    private SesionCliente sesion; //Sesión del cliente
 
-    Conexion conexion = new Conexion();
+    Conexion conexion = new Conexion(); //Clase con los métodos para la comunicación con la BDD
 
+    //Constructor
     public HiloCliente(Socket clientSocket) {
         this.socketCliente = clientSocket;
 
@@ -62,6 +66,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
+    //Getters y setters
     public Socket getSocket() {
         return socketCliente;
     }
@@ -82,6 +87,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
         this.establecimientoActual = establecimientoActual;
     }
 
+    //Ejecución del hilo
     @Override
     public void run() {
         try {
@@ -89,32 +95,76 @@ public class HiloCliente implements Runnable, ObservadorSesion {
             in = new ObjectInputStream(socketCliente.getInputStream());
             out = new ObjectOutputStream(socketCliente.getOutputStream());
 
+            //Lee mensajes mientras el estado no sea EXIT
             while (estado != EXIT) {
                 Message peticion = (Message) in.readObject();
-                if (peticion == null) {
-                    //listaClientes.remove(this);
-                    System.out.println("Cliente desconectado: " + socketCliente.getInetAddress().getHostAddress());
-                    break;
-                }
-                System.out.println("----------------------------------------------------");
-                System.out.println("Petición desde: " + socketCliente.getInetAddress().getHostAddress());
-                System.out.println("Usuario: " + usuario);
-                System.out.println("TIPO DE PETICIÓN: " + peticion.getRequestType());
-                System.out.println("ACCIÓN: " + peticion.getRequestAction());
-                System.out.println("PARÁMETROS: " + peticion.getData());
+                
+//                System.out.println("------------------LOG----------------------------------");
+//                System.out.println("Petición desde: " + socketCliente.getInetAddress().getHostAddress());
+//                System.out.println("Usuario: " + usuario);
+//                System.out.println("TIPO DE PETICIÓN: " + peticion.getRequestType());
+//                System.out.println("ACCIÓN: " + peticion.getRequestAction());
+//                System.out.println("PARÁMETROS: " + peticion.getData());
 
-                //LOGIN
-                //LOGIN
-                //rafa@gmail.com,1234
+                //Comprobación de estado
                 switch (estado) {
 
+                    //ESTADO WAITING. Antes de hacer login
                     case WAITING:
 
+                        //Comprobación del tipo de petición
                         switch (peticion.getRequestType()) {
 
+                            //BLOQUE LOGIN
                             case "LOGIN":
 
+                                //Comprobación de la acción de la petición
                                 switch (peticion.getRequestAction()) {
+                                    
+                                    case "EXISTE_ADMIN":
+                                        
+                                        synchronized (this) {
+                                            ArrayList<Usuario> adminList = conexion.getUsuarios("administrador");
+
+                                            //Lista de "usuarios"
+                                            ArrayList<Object> datos_admin_query = new ArrayList<Object>();
+
+                                            //Comprueba si el listado contiene algún usuario con rol administrador
+                                            if(!adminList.isEmpty()){
+                                                datos_admin_query.add(true);
+                                            }
+                                            else{
+                                                datos_admin_query.add(false);
+                                            }
+
+                                            Message respuesta_admin_query = new Message("USUARIO", "EXISTE_ADMIN", datos_admin_query);
+                                            out.writeObject(respuesta_admin_query);
+                                        }
+
+                                        break;
+                                        
+                                    case "REGISTRAR_ADMIN":
+                                        
+                                        synchronized (this) {
+                                            
+                                            boolean resultadoInsertarUsuario = conexion.insertarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (ArrayList<String>) peticion.getData().get(3));
+
+                                            //Ejecución sin errores
+                                            if (resultadoInsertarUsuario) {
+                                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                                datos_insert.add(true);
+                                                Message respuesta_insert = new Message("LOGIN", "REGISTRAR_ADMIN", datos_insert);
+                                                out.writeObject(respuesta_insert);
+                                            } else {
+                                                ArrayList<Object> datos_insert = new ArrayList<Object>();
+                                                datos_insert.add(false);
+                                                Message respuesta_insert = new Message("LOGIN", "REGISTRAR_ADMIN", datos_insert);
+                                                out.writeObject(respuesta_insert);
+                                            }
+                                            
+                                        }
+
+                                        break;    
 
                                     case "LOGIN":
 
@@ -124,7 +174,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         synchronized (this) {
                                             Usuario usuario = conexion.getUsuario(correo, passw);
 
-                                            System.out.println(usuario);
 
                                             //Si no es null, significa que se encontró un usuario con esa combinación de correo y contraseña
                                             if (usuario != null) {
@@ -147,9 +196,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 //Se asigna al cliente el usuario con el que logea
                                                 setUsuario(usuario);
 
-                                                //notificarClientes();
                                                 estado = RUNNING;
-                                                System.out.println("ok");
 
                                             } //Si no, es que los datos no son correctos y no se encontró ningún usuario
                                             else {
@@ -170,7 +217,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         synchronized (this) {
                                             Usuario usuario = conexion.getUsuario(correoMovil, passwMovil);
 
-                                            System.out.println(usuario);
 
                                             //Si no es null, significa que se encontró un usuario con esa combinación de correo y contraseña
                                             if (usuario != null) {
@@ -181,13 +227,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 }
 
                                                 if (!listaRoles.contains("cliente")) {
-                                                    System.out.println("entra1");
                                                     ArrayList<Object> datos = new ArrayList<Object>();
                                                     datos.add(false);
                                                     Message respuesta = new Message("LOGIN", "LOGIN_ANDROID", datos);
                                                     out.writeObject(respuesta);
                                                 } else {
-                                                    System.out.println("entra2");
                                                     ArrayList<Object> datos = new ArrayList<Object>();
                                                     datos.add(true);
                                                     datos.add(usuario.getNombre());
@@ -200,11 +244,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                     //Se asigna al cliente el usuario con el que logea
                                                     setUsuario(usuario);
 
-                                                    //notificarAmigos();
-                                                    //enviarAmigos();
-                                                    //notificarClientes();
+                                                    
                                                     estado = RUNNING;
-                                                    System.out.println("ok");
                                                 }
 
                                             } //Si no, es que los datos no son correctos y no se encontró ningún usuario
@@ -226,7 +267,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         synchronized (this) {
                                             Usuario usuario = conexion.getUsuario(correoMovilTrabaj, passwMovilTrabaj);
 
-                                            System.out.println(usuario);
 
                                             //Si no es null, significa que se encontró un usuario con esa combinación de correo y contraseña
                                             if (usuario != null) {
@@ -237,13 +277,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 }
 
                                                 if (!listaRoles.contains("trabajador")) {
-                                                    System.out.println("entra1");
                                                     ArrayList<Object> datos = new ArrayList<Object>();
                                                     datos.add(false);
                                                     Message respuesta = new Message("LOGIN", "LOGIN_ANDROID_TRABAJADORES", datos);
                                                     out.writeObject(respuesta);
                                                 } else {
-                                                    System.out.println("entra2");
                                                     ArrayList<Object> datos = new ArrayList<Object>();
                                                     datos.add(true);
                                                     datos.add(usuario.getNombre());
@@ -257,11 +295,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                     setUsuario(usuario);
 
                                                     notificarAmigos();
-                                                    //enviarAmigos();
-                                                    //notificarClientes();
 
                                                     estado = RUNNING;
-                                                    System.out.println("ok");
                                                 }
 
                                             } //Si no, es que los datos no son correctos y no se encontró ningún usuario
@@ -285,14 +320,12 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             //Ejecución sin errores
                                             if (resultadoInsertarUsuario) {
-                                                System.out.println("insertado ok");
                                                 ArrayList<Object> datos_insert = new ArrayList<Object>();
                                                 datos_insert.add(true);
                                                 datos_insert.add(peticion.getData().get(0) + "");
                                                 Message respuesta_insert = new Message("LOGIN", "REGISTRO", datos_insert);
                                                 out.writeObject(respuesta_insert);
                                             } else {
-                                                System.out.println("insertado mal");
                                                 ArrayList<Object> datos_insert = new ArrayList<Object>();
                                                 datos_insert.add(false);
                                                 Message respuesta_insert = new Message("LOGIN", "REGISTRO", datos_insert);
@@ -303,15 +336,10 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                         break;
 
-                                    //LOGIN
-                                    //SALIR  
-                                    //pepe    
+                                       
                                     case "SALIR":
 
-                                        System.out.println("Cliente desconectado: " + socketCliente.getInetAddress().getHostAddress());
                                         Server.eliminarHiloCliente(this);
-                                        Server.mostrarClientesConectados();
-
                                         estado = EXIT;
 
                                         break;
@@ -323,10 +351,13 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                         }
 
                         break;
+                        
+                    //ESTADO RUNNING. Después de hacer login    
                     case RUNNING:
 
                         switch (peticion.getRequestType()) {
 
+                            //BLOQUE SERVIDOR
                             case "SERVIDOR":
 
                                 switch (peticion.getRequestAction()) {
@@ -354,6 +385,9 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             int numExcepciones = conexion.getExcepciones().size(); //Leer del fichero de errores
                                             datos_server_query.add(numExcepciones);
+                                            
+                                            ArrayList<String> excepciones = conexion.getExcepciones();
+                                            datos_server_query.add(excepciones);
 
                                             Message respuesta_server_query = new Message("SERVIDOR", "DATOS_SERVIDOR", datos_server_query);
                                             out.writeObject(respuesta_server_query);
@@ -363,17 +397,14 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         break;
 
                                     //Devuelve los datos de los establecimientos del usuario que hace login
-                                    //Desde el dashboard, el usuario puede elegir ver los datos del establecimiento elegido    
                                     case "DATOS_ESTABL":
 
                                         synchronized (this) {
-                                            Usuario usuario = conexion.getUsuario((String) peticion.getData().get(0));
 
                                             ArrayList<Object> datos_establ_query = new ArrayList<Object>();
 
                                             double cajaHoy = 0;
                                             for (Establecimiento e : usuario.getEstablecimientos()) {
-                                                System.out.println(e.getNombre());
                                                 String fechaHoy = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                                                 cajaHoy += conexion.getCaja(e.getNombre(), fechaHoy);
                                             }
@@ -386,7 +417,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                                 for (HiloCliente h : Server.getListaClientes()) {
 
-                                                    if (u.getNombre().equals(h.getUsuario().getNombre())) {
+                                                    if (h.getUsuario() != null && u.getNombre().equals(h.getUsuario().getNombre())) {
 
                                                         trabajadoresConectados++;
 
@@ -403,11 +434,22 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             datos_establ_query.add(totalTrabajadores);
                                             datos_establ_query.add(fechaRecarga);
 
-                                            long totalPedidos = conexion.getNumPedidos("TODOS");
+                                            long totalPedidos = 0;
+                                            for(Establecimiento e : usuario.getEstablecimientos()){
+                                                totalPedidos += conexion.getLineasEstablecimiento(e,"TODAS").size();
+                                            }
+                                            
                                             datos_establ_query.add(totalPedidos);
-                                            long pedidosFin = 1;//conexion.getNumPedidos("FINALIZADOS");
+                                            long pedidosFin = 0;
+                                            for(Establecimiento e : usuario.getEstablecimientos()){
+                                                pedidosFin += conexion.getLineasEstablecimiento(e,"Confirmado").size();
+                                            }
+                                            
                                             datos_establ_query.add(pedidosFin);
-                                            long pedidosPen = 1;//conexion.getNumPedidos("PENDIENTES");
+                                            long pedidosPen = 0;
+                                            for(Establecimiento e : usuario.getEstablecimientos()){
+                                                pedidosPen += conexion.getLineasEstablecimiento(e,"Preparando").size();
+                                            }
                                             datos_establ_query.add(pedidosPen);
 
                                             Message respuesta_establ_query = new Message("SERVIDOR", "DATOS_ESTABL", datos_establ_query);
@@ -451,7 +493,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 for (HiloCliente h : Server.getListaClientes()) {
 
                                                     if (u.getNombre().equals(h.getUsuario().getNombre())) {
-                                                        System.out.println("usuario: " + u.getNombre());
                                                         datosUsuarios.add(u.getNombre());
                                                         ArrayList<String> rolesUsuario = new ArrayList<>();
                                                         for (Rol r : u.getRols()) {
@@ -480,18 +521,9 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                         synchronized (this) {
 
-                                            for (HiloCliente cliente : Server.getListaClientes()) {
-
-                                                if (cliente.getUsuario().getNombre().equals(usuario_logout)) {
-                                                    System.out.println(usuario_logout + " ha cerrado sesión");
-                                                    setUsuario(null); //El usuario vuelve a ser null, ya que no ha iniciado sesión
-                                                    sesion_cerrada = true;
-                                                    break;
-                                                }
-
-                                            }
-
-                                            System.out.println(usuario);
+                                            
+                                            setUsuario(null); //El usuario vuelve a ser null, ya que no ha iniciado sesión
+                                            sesion_cerrada = true;
 
                                             //Se cierra sesión sin errores
                                             if (sesion_cerrada) {
@@ -516,6 +548,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                 break;
 
+                            //BLOQUE USUARIO
                             case "USUARIO":
 
                                 switch (peticion.getRequestAction()) {
@@ -588,12 +621,12 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                                 for (Establecimiento e : usuarioModificar.getEstablecimientos()) {
                                                     listaEstabl.add(e.getNombre());
+                                                    
                                                 }
 
                                                 datos_user_query.add(listaEstabl);
                                             }
 
-                                            System.out.println(usuarioModificar);
                                             Message respuesta_user_query = new Message("USUARIO", "GET_DATOS_USUARIO", datos_user_query);
                                             out.writeObject(respuesta_user_query);
 
@@ -636,8 +669,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             boolean resultadoActualizarUsuario = conexion.actualizarUsuario((String) peticion.getData().get(0), (String) peticion.getData().get(1), (String) peticion.getData().get(2), (String) peticion.getData().get(3));
 
+                                            
                                             //Ejecución sin errores
                                             if (resultadoActualizarUsuario) {
+                                                usuario = conexion.getUsuario((String) peticion.getData().get(1));
+                                                this.usuario = usuario;
                                                 ArrayList<Object> datos_actualizar = new ArrayList<Object>();
                                                 datos_actualizar.add(true);
                                                 datos_actualizar.add((String) peticion.getData().get(1)); //Nuevo usuario
@@ -685,13 +721,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                                 //Ejecución sin errores
                                                 if (resultadoInsertarUsuario) {
-                                                    System.out.println("insertado ok");
                                                     ArrayList<Object> datos_insert = new ArrayList<Object>();
                                                     datos_insert.add(true);
                                                     Message respuesta_insert = new Message("USUARIO", "INSERTAR", datos_insert);
                                                     out.writeObject(respuesta_insert);
                                                 } else {
-                                                    System.out.println("insertado mal");
                                                     ArrayList<Object> datos_insert = new ArrayList<Object>();
                                                     datos_insert.add(false);
                                                     Message respuesta_insert = new Message("USUARIO", "INSERTAR", datos_insert);
@@ -826,10 +860,10 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                     case "GET_AMIGOS":
                                         
                                         try {
-                                        enviarAmigos();
-                                    } catch (NullPointerException ex) {
+                                            enviarAmigos();
+                                        } catch (NullPointerException ex) {
 
-                                    }
+                                        }
 
                                     break;
 
@@ -849,7 +883,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                 }
 
                                 break;
-
+                            
+                            //BLOQUE ROL
                             case "ROL":
 
                                 switch (peticion.getRequestAction()) {
@@ -868,6 +903,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                 break;
 
+                            //BLOQUE ESTABLECIMIENTO
                             case "ESTABLECIMIENTO":
 
                                 switch (peticion.getRequestAction()) {
@@ -883,6 +919,100 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         }
 
                                         break;
+                                        
+                                    case "GET_DATOS_ESTABLECIMIENTOS":
+                                        
+                                        synchronized (this) {
+                                            ArrayList<Establecimiento> establList = conexion.getDatosEstablecimientos();
+                                            ArrayList<Object> datos_establ_query = new ArrayList<Object>();
+                                            
+                                            for(Establecimiento e : establList){
+                                                ArrayList<Object> camposEstabl = new ArrayList<>();
+                                                
+                                                camposEstabl.add(e.getNombre());
+                                                camposEstabl.add(e.getDireccion());
+                                                
+                                                datos_establ_query.add(camposEstabl);
+                                            }
+                                            
+                                            
+                                            Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_DATOS_ESTABLECIMIENTOS", datos_establ_query);
+                                            out.writeObject(respuesta_establ_query);
+                                        }
+
+                                        break;    
+                                        
+                                    case "GET_DATOS_ESTABLECIMIENTO":
+                                        
+                                        synchronized (this) {
+                                            String nombreEstablModificar = (String) peticion.getData().get(0);
+                                            Establecimiento establ = conexion.getEstablecimiento(nombreEstablModificar);
+                                            ArrayList<Object> datos_establ_query = new ArrayList<Object>();
+                                            datos_establ_query.add(establ.getNombre());
+                                            datos_establ_query.add(establ.getDireccion());
+                                            datos_establ_query.add(establ.getLatitud());
+                                            datos_establ_query.add(establ.getLongitud());
+                                            
+                                            Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_DATOS_ESTABLECIMIENTO", datos_establ_query);
+                                            out.writeObject(respuesta_establ_query);
+                                        }
+
+                                        break;  
+                                        
+                                    case "BORRAR":
+                                        
+                                        synchronized (this) {
+
+                                            String establBorrar = (String) peticion.getData().get(0);
+
+                                            boolean resultadoBorrarEstabl = conexion.borrarEstablecimiento(establBorrar);
+                                            //Ejecución sin errores
+                                            if (resultadoBorrarEstabl) {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(true);
+                                                Message respuesta_delete = new Message("ESTABLECIMIENTO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_delete);
+
+                                            } else {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(false);
+                                                Message respuesta_insert = new Message("ESTABLECIMIENTO", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_insert);
+                                            }
+                                        }
+                                        
+                                        break;  
+                                        
+                                    case "ACTUALIZAR_DATOS_ESTABLECIMIENTO":
+
+                                        String establ_a_actualizar = (String) peticion.getData().get(0);
+
+                                        String nuevoNombre = (String) peticion.getData().get(1);
+                                        String nuevaDireccion = (String) peticion.getData().get(2);
+                                        String nuevaLatitud = (String) peticion.getData().get(3);
+                                        String nuevaLongitud = (String) peticion.getData().get(4);
+                                        
+
+                                        synchronized (this) {
+
+                                            boolean resultadoActualizarEstabl = conexion.actualizarEstabl(establ_a_actualizar, nuevoNombre, nuevaDireccion,nuevaLatitud,nuevaLongitud);
+
+                                            //Ejecución sin errores
+                                            if (resultadoActualizarEstabl) {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(true);
+                                                Message respuesta_actualizar = new Message("ESTABLECIMIENTO", "ACTUALIZAR_DATOS_ESTABLECIMIENTO", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            } else {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(false);
+                                                Message respuesta_actualizar = new Message("ESTABLECIMIENTO", "ACTUALIZAR_DATOS_ESTABLECIMIENTO", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            }
+
+                                        }
+
+                                        break;      
 
                                     case "GET_ESTABLECIMIENTOS_CERCANOS":
                                         
@@ -891,8 +1021,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             double longitud = (double) peticion.getData().get(1);
                                             double radio = (double) peticion.getData().get(2);
                                             ArrayList<Object> establList = conexion.getEstablecimientos(latitud, longitud, radio);
-
-                                            System.out.println(establList.size());
 
                                             Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_ESTABLECIMIENTOS_CERCANOS", establList);
                                             out.writeObject(respuesta_establ_query);
@@ -907,7 +1035,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         synchronized (this) {
 
                                             ArrayList<String> establList = conexion.getEstablecimientos(usuario);
-                                            System.out.println(establList);
                                             ArrayList<Object> datos_establ_query = new ArrayList<Object>();
                                             datos_establ_query.add(establList);
                                             Message respuesta_establ_query = new Message("ESTABLECIMIENTO", "GET_ESTABLECIMIENTOS_USUARIO", datos_establ_query);
@@ -968,10 +1095,40 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             Message respuesta_trabajadores_query = new Message("ESTABLECIMIENTO", "GET_TRABAJADORES", datos_trabajadores_query);
                                             out.writeObject(respuesta_trabajadores_query);
-                                            System.out.println(datos_trabajadores_query);
                                         }
 
                                         break;
+                                        
+                                    case "GET_TRABAJADORES_PROPIETARIOS":
+                                    
+                                        synchronized (this) {
+
+                                            //Obtiene todos los trabajadores del establecimiento recibido
+                                            String establecimiento = (String) peticion.getData().get(0);
+                                            ArrayList<Usuario> trabajadores = conexion.getTrabajadoresPropietarios(establecimiento);
+
+                                            //Lista de "Usuario" (trabajador)
+                                            ArrayList<Object> datos_trabajadores_query = new ArrayList<>();
+
+                                            //Recorre la lista de trabajadores de la base de datos
+                                            //Por cada una, se crea una lista para añadir sus campos, y se añade a la lista inicial que se envía
+                                            //al cliente.
+                                            for (Usuario u : trabajadores) {
+
+                                                ArrayList<Object> campos = new ArrayList<>();
+                                                campos.add(u.getNombre());
+                                                campos.add(u.getCorreo());
+                                                campos.add(u.getPassw());
+
+                                                datos_trabajadores_query.add(campos);
+
+                                            }
+
+                                            Message respuesta_trabajadores_query = new Message("ESTABLECIMIENTO", "GET_TRABAJADORES_PROPIETARIOS", datos_trabajadores_query);
+                                            out.writeObject(respuesta_trabajadores_query);
+                                        }
+
+                                        break;    
 
                                     case "SET_ESTABLECIMIENTO":
                                         
@@ -979,7 +1136,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             String establecimiento = (String) peticion.getData().get(0);
                                             Establecimiento establ = conexion.getEstablecimiento(establecimiento);
                                             this.establecimientoActual = establ;
-                                            System.out.println("ESTABL: " + establ.getNombre());
 
                                             ArrayList<Object> datosEstabl = new ArrayList<>();
                                             datosEstabl.add(establecimientoActual.getLatitud());
@@ -1003,6 +1159,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                 break;
 
+                            //BLOQUE CATEGORÍA
                             case "CATEGORIA":
 
                                 switch (peticion.getRequestAction()) {
@@ -1011,23 +1168,14 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         
                                         synchronized (this) {
                                             String establecimiento = (String) peticion.getData().get(0);
-
-                                            /*
-                                            if(this.establecimientoActual == null){
-                                                this.establecimientoActual = conexion.getEstablecimiento(establecimiento);
-                                                notificarAmigos();
-                                            }
-                                             */
+                                            
                                             ArrayList<Categoria> categorias = conexion.getCategorias(establecimiento);
-
-                                            System.out.println(categorias);
                                             ArrayList<Object> datos_categories_query = new ArrayList<Object>();
 
                                             for (Categoria c : categorias) {
                                                 datos_categories_query.add(c.getNombre());
                                             }
 
-                                            System.out.println(datos_categories_query);
                                             Message respuesta_categories_query = new Message("CATEGORIA", "GET_CATEGORIAS", datos_categories_query);
                                             out.writeObject(respuesta_categories_query);
 
@@ -1042,7 +1190,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             String nombreCategoria = (String) peticion.getData().get(0);
                                             String descripcionCategoria = (String) peticion.getData().get(1);
                                             Establecimiento establCategoria = conexion.getEstablecimiento((String) peticion.getData().get(2));
-                                            System.out.println(establCategoria);
 
                                             boolean resultadoInsertarCategoria = conexion.insertarCategoria(nombreCategoria, descripcionCategoria, establCategoria);
 
@@ -1062,11 +1209,88 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         }
 
                                         break;
+                                        
+                                    case "BORRAR":
+                                        
+                                        synchronized (this) {
+
+                                            String categoriaBorrar = (String) peticion.getData().get(0);
+                                            String establCategoriaBorrar = (String) peticion.getData().get(1);
+
+                                            boolean resultadoBorrarCategoria = conexion.borrarCategoria(categoriaBorrar, establCategoriaBorrar);
+                                            //Ejecución sin errores
+                                            if (resultadoBorrarCategoria) {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(true);
+                                                Message respuesta_delete = new Message("CATEGORIA", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_delete);
+
+                                            } else {
+                                                ArrayList<Object> datos_delete = new ArrayList<Object>();
+                                                datos_delete.add(false);
+                                                Message respuesta_insert = new Message("CATEGORIA", "BORRAR", datos_delete);
+                                                out.writeObject(respuesta_insert);
+                                            }
+                                        }
+                                        
+                                        break;
+                                        
+                                    case "ACTUALIZAR_DATOS_CATEGORIA":
+
+                                        String categoria_a_actualizar = (String) peticion.getData().get(0);
+                                        String establCategoria = (String) peticion.getData().get(1);
+
+                                        String nuevoNombre = (String) peticion.getData().get(2);
+                                        String nuevaDescrip = (String) peticion.getData().get(3);
+                                        
+
+                                        synchronized (this) {
+
+                                            boolean resultadoActualizarCategoria = conexion.actualizarCategoria(categoria_a_actualizar, establCategoria, nuevoNombre, nuevaDescrip);
+
+                                            //Ejecución sin errores
+                                            if (resultadoActualizarCategoria) {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(true);
+                                                Message respuesta_actualizar = new Message("CATEGORIA", "ACTUALIZAR_DATOS_CATEGORIA", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            } else {
+                                                ArrayList<Object> datos_actualizar = new ArrayList<Object>();
+                                                datos_actualizar.add(false);
+                                                Message respuesta_actualizar = new Message("CATEGORIA", "ACTUALIZAR_DATOS_CATEGORIA", datos_actualizar);
+                                                out.writeObject(respuesta_actualizar);
+                                            }
+
+                                        }
+
+                                        break;  
+                                        
+                                    case "GET_DATOS_CATEGORIA":
+
+                                        String nombreCategoria = (String) peticion.getData().get(0);
+                                        String establecimientoCategoria = (String) peticion.getData().get(1);
+
+                                        synchronized (this) {
+
+                                            Categoria categoria = conexion.getCategoria(nombreCategoria, establecimientoCategoria);
+
+                                            ArrayList<Object> datos_product_query = new ArrayList<>();
+
+                                            datos_product_query.add(categoria.getNombre());
+                                            datos_product_query.add(categoria.getDescripcion());
+                                            
+                                            Message respuesta_product_query = new Message("CATEGORIA", "GET_DATOS_CATEGORIA", datos_product_query);
+                                            out.writeObject(respuesta_product_query);
+
+                                        }
+
+                                        break;    
 
                                 }
 
                                 break;
 
+                            //BLOQUE PRODUCTO    
                             case "PRODUCTO":
 
                                 switch (peticion.getRequestAction()) {
@@ -1083,7 +1307,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             ArrayList<String> categorias = (ArrayList<String>) peticion.getData().get(5);
                                             byte[] imagen = (byte[]) peticion.getData().get(6);
 
-                                            //System.out.println(establCategoria);
                                             boolean resultadoInsertarProducto = conexion.insertarProducto(nombreProducto, descripcionProducto, precio, stock, imagen, categorias, establProducto);
 
                                             //Ejecución sin errores
@@ -1125,6 +1348,13 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 camposProducto.add(p.getPrecio());
                                                 camposProducto.add(p.getStock());
                                                 camposProducto.add(p.getImagen());
+                                                
+                                                ArrayList<String> categoriasString = new ArrayList<>();
+                                                for(Categoria c : p.getCategorias()){
+                                                    categoriasString.add(c.getNombre());
+                                                }
+                                                
+                                                camposProducto.add(categoriasString);
 
                                                 datos_prod_query.add(camposProducto);
 
@@ -1180,11 +1410,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             Producto producto = conexion.getProducto(nombreProducto, establecimientoProducto);
 
-                                            System.out.println(producto.getNombre());
-                                            System.out.println(producto.getDescripcion());
-                                            System.out.println(producto.getPrecio());
-                                            System.out.println(producto.getStock());
-
                                             ArrayList<Object> datos_product_query = new ArrayList<>();
 
                                             datos_product_query.add(producto.getNombre());
@@ -1200,12 +1425,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 categoriasProducto.add(c.getNombre());
 
                                             }
-                                            System.out.println(categoriasProducto);
 
                                             datos_product_query.add(categoriasProducto);
-
-                                            System.out.println("Tamaño:" + datos_product_query.size());
-
                                             Message respuesta_product_query = new Message("PRODUCTO", "GET_DATOS_PRODUCTO", datos_product_query);
                                             out.writeObject(respuesta_product_query);
 
@@ -1220,10 +1441,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                         String nuevoNombre = (String) peticion.getData().get(2);
                                         String nuevaDescrip = (String) peticion.getData().get(3);
-                                        String campoPrecio = (String) peticion.getData().get(4);
-                                        double nuevoPrecio = Double.parseDouble(campoPrecio);
-                                        String campoStock = (String) peticion.getData().get(5);
-                                        int nuevoStock = Integer.parseInt(campoStock);
+                                        double nuevoPrecio = (double) peticion.getData().get(4);
+                                        int nuevoStock = (int) peticion.getData().get(5);
                                         byte[] nuevaImagen = (byte[]) peticion.getData().get(6);
                                         ArrayList<String> nuevasCategorias = (ArrayList<String>) peticion.getData().get(7);
 
@@ -1256,7 +1475,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             String establProductoBorrar = (String) peticion.getData().get(1);
 
                                             boolean resultadoBorrarProducto = conexion.borrarProducto(productoBorrar, establProductoBorrar);
-                                            //Ejecución sin productoBorrar
+                                            //Ejecución sin errores
                                             if (resultadoBorrarProducto) {
                                                 ArrayList<Object> datos_delete = new ArrayList<Object>();
                                                 datos_delete.add(true);
@@ -1277,6 +1496,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                 break;
 
+                            //BLOQUE PEDIDO
                             case "PEDIDO":
 
                                 switch (peticion.getRequestAction()) {
@@ -1337,7 +1557,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             Message respuesta_pedidos_query = new Message("PEDIDO", "GET_PEDIDOS", datos_pedidos_query);
                                             out.writeObject(respuesta_pedidos_query);
-                                            System.out.println(datos_pedidos_query);
                                         }
 
                                         break;
@@ -1372,8 +1591,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                             }
                                             sesion.agregarLineasPedido(lineasPedido);
                                             //sesion.setLineasPedido(lineasPedido);
-
-//                                            
+                                            
                                         }
 
                                         break;
@@ -1396,9 +1614,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 sesion.añadirInvitado(this);
                                                 this.sesion = sesion;
 
-                                                System.out.println("Pedido: " + sesion.getPedidoSesion().getId());
-                                                System.out.println("Participante: " + sesion.getClienteAnfitrion());
-                                                //conexion.insertarParticipante(sesion.getPedidoSesion(), sesion.getClienteAnfitrion());
                                                 conexion.insertarParticipantes(sesion.getPedidoSesion(), sesion.getUsuariosInvitados());
 
                                                 Server.agregarSesion(sesion);
@@ -1410,57 +1625,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 Message respuesta_nueva_sesion = new Message("PEDIDO", "NUEVO_PEDIDO", data);
                                                 out.writeObject(respuesta_nueva_sesion);
                                             } else {
-                                                System.out.println("Error al crear la sesión");
                                             }
                                         }
 
                                         break;
 
-                                    case "UNIRSE_PEDIDO":
-                                    
-                                        synchronized (this) {
-
-                                            Usuario usuarioAnfitrion = conexion.getUsuario((String) peticion.getData().get(0));
-                                            Establecimiento establecimientoSesion = conexion.getEstablecimiento((String) peticion.getData().get(1));
-                                            int codigoSesion = Integer.parseInt((String) peticion.getData().get(2));
-
-                                            for (SesionCliente sesion : Server.getSesiones()) {
-
-                                                if (sesion.getCodigoSesion() == codigoSesion) {
-
-                                                    sesion.añadirInvitado(this);
-                                                    this.sesion = sesion;
-
-                                                    break;
-
-                                                }
-
-                                            }
-
-                                            //Ejecución sin errores
-                                            if (sesion != null) {
-
-                                                ArrayList<Object> data = new ArrayList<>();
-                                                data.add(sesion.getPedidoSesion().getId());
-                                                data.add(sesion.getClienteAnfitrion().getNombre());
-                                                data.add(sesion.convertirLista());
-
-                                                Message respuesta_nueva_sesion = new Message("PEDIDO", "UNIRSE_PEDIDO", data);
-                                                out.writeObject(respuesta_nueva_sesion);
-
-                                            } else {
-
-                                                ArrayList<Object> data = new ArrayList<>();
-                                                data.add(0);
-
-                                                Message respuesta_nueva_sesion = new Message("PEDIDO", "UNIRSE_PEDIDO", data);
-                                                out.writeObject(respuesta_nueva_sesion);
-
-                                            }
-
-                                        }
-
-                                        break;
 
                                     case "INVITAR":
                                         
@@ -1491,7 +1660,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                                 data.add(2); //establecimientos distintos
                                                                 break;
                                                             } else {
-                                                                cliente.enviarInvitacion(usuario.getNombre(), establecimiento, true);
+                                                                cliente.enviarInvitacion(usuario.getNombre(), establecimiento);
                                                                 data.add(0); //bien
                                                                 break;
                                                             }
@@ -1522,11 +1691,8 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                                     sesion.añadirInvitado(this);
                                                     this.sesion = sesion;
-
-                                                    System.out.println("Pedido: " + sesion.getPedidoSesion().getId());
-                                                    System.out.println("Participante: " + usuario.getNombre());
+                                                    
                                                     //Añade el participante en la BDD
-                                                    //conexion.insertarParticipante(sesion.getPedidoSesion(), usuario);
                                                     conexion.insertarParticipantes(sesion.getPedidoSesion(), sesion.getUsuariosInvitados());
 
                                                 }
@@ -1575,7 +1741,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
                                             Message respuesta_pedidos_query = new Message("PEDIDO", "GET_LISTA_PEDIDOS", datos);
                                             out.writeObject(respuesta_pedidos_query);
-                                            System.out.println(datos);
                                         }
 
                                         break;
@@ -1601,7 +1766,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         synchronized (this) {
 
                                             ArrayList<LineaPedido> lineasAPagar = new ArrayList<>();
-
+                                            
                                             for (LineaPedido lp : sesion.getLineasDePedido()) {
 
                                                 if (lp.getEstado().equals("Iniciado")) {
@@ -1611,12 +1776,32 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 }
 
                                             }
+                                            
+                                            //Inserta los productos de las líneas recibidas sin repeticiones
+                                            HashMap<Producto,Integer> productosLineas = new HashMap<>();
+                                            for(LineaPedido linea : lineasAPagar){
+                                                
+                                                Producto producto = linea.getProducto();
+                                                int cantidad = linea.getCantidad();
+                                                
+                                                if(productosLineas.containsKey(producto)){
+                                                    
+                                                    int cantidadExistente = productosLineas.get(producto);
+                                                    cantidad += cantidadExistente;
+                                                    
+                                                }
+                                                
+                                                //Actualizar el valor del producto en el HashMap
+                                                productosLineas.put(producto, cantidad);
+                                            }
+                                            
+                                            //Actualiza el stock de los productos en la BDD
+                                            conexion.actualizarStock(productosLineas);
 
                                             boolean exitoInsertarLp = conexion.insertarLineasPedido(lineasAPagar);
 
                                             //Ejecución sin errores
                                             if (exitoInsertarLp) {
-                                                System.out.println("entra exito lp");
                                                 //Las lineas con estado Pagando, son las que acaban de insertarse en la BDD
                                                 for (LineaPedido lp : sesion.getLineasDePedido()) {
                                                     if (lp.getEstado().equals("Pagando")) {
@@ -1688,7 +1873,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                         lineaPedido.setEstado(estadoNuevo);
                                                         if (estadoNuevo.equals("Recoger")) {
                                                             lineaPedido.setCodigoRecogida(sesion.generarNumeroAleatorio());
-                                                            System.out.println("Codigo: " + lineaPedido.getCodigoRecogida());
                                                         }
                                                         //ACTUALIZA ESTA LINEA PEDIDO EN LA BASE DE DATOS
                                                         conexion.actualizarLineaPedido(lineaPedido);
@@ -1725,7 +1909,6 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         //Si es anfitrión, además de elimiar el hilo de la lista de invitados, se notifica a los invitados
                                         //del cierre de la sesión, y se elimina del servidor
                                         if (sesion.getClienteAnfitrion().getNombre().equals(usuario.getNombre())) {
-                                            System.out.println("entra anfitrion");
                                             sesion.notificarCierre();
                                             sesion.eliminarInvitado(this);
 
@@ -1760,6 +1943,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                         int codigoRecogida = Integer.parseInt(codigo);
                                         int idPedidoSesion = (int) peticion.getData().get(1);
 
+                                        boolean correcto = false;
                                         for (SesionCliente sesion : Server.getSesiones()) {
 
                                             if (sesion.getPedidoSesion().getId() == idPedidoSesion) {
@@ -1767,11 +1951,12 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 for (LineaPedido lp : sesion.getLineasDePedido()) {
 
                                                     if (lp.getCodigoRecogida() == codigoRecogida) {
-
+                                                        correcto = true;
                                                         lp.setEstado("Confirmado");
                                                         conexion.actualizarLineaPedido(lp);
-
+                                                        break;
                                                     }
+                                                    
 
                                                 }
                                                 
@@ -1779,6 +1964,15 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                                                 sesion.notificarPedidos();
                                             }
 
+                                        }
+                                        
+                                        //Si el código no es correcto, se envía un mensaje al trabajador para que no cambie el estado
+                                        if(!correcto){
+                                            ArrayList<Object> data = new ArrayList<>();
+                                            data.add(false);
+
+                                            Message message = new Message("PEDIDO","RECOGIDA",data);
+                                            out.writeObject(message);
                                         }
 
                                         try {
@@ -1802,16 +1996,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
             }
 
-            socketCliente.close();
+            socketCliente.close(); //Cierra la conexión
         } catch (IOException e) {
-            if (usuario != null) {
-                System.out.println("Cliente desconectado inesperadamente: " + usuario.getNombre() + "@" + socketCliente.getInetAddress().getHostAddress());
-            } else {
-                System.out.println("Cliente desconectado inesperadamente: " + socketCliente.getInetAddress().getHostAddress());
-            }
-            //Server.eliminarHiloCliente(Thread.currentThread());
+            
+            //Elimina el hilo del cliente de la colección del servidor
             Server.eliminarHiloCliente(this);
-            Server.mostrarClientesConectados();
 
             //Si está en una sesión, se elimina de la lista de invitados. Se actualizan los participantes en la BDD
             if (sesion != null) {
@@ -1831,6 +2020,10 @@ public class HiloCliente implements Runnable, ObservadorSesion {
         }
     }
 
+    /**
+     * Envía al usuario su lista de amigos actualizada
+     * @param remitente El usuario que recibe la lista de amigos
+     */
     public void notificarCliente(Usuario remitente) {
 
         for (HiloCliente cliente : Server.getListaClientes()) {
@@ -1846,7 +2039,9 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
-    //Notifica a los amigos del cliente de que se ha desconectado, para que recarguen sus lista de amigos
+    /**
+     * Notifica a los amigos del cliente de que se ha conectado o desconectado, para que recarguen sus lista de amigos
+     */
     public void notificarAmigos() {
 
         ArrayList<Object> amigos = conexion.getAmigos(usuario.getNombre());
@@ -1879,6 +2074,9 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
+    /**
+     * Envía la lista de amigos y solicitudes recibidas al cliente remoto
+     */
     public void enviarAmigos() {
 
         ArrayList<Object> solicitudes = conexion.getSolicitudesPendientes(usuario.getNombre());
@@ -1889,15 +2087,12 @@ public class HiloCliente implements Runnable, ObservadorSesion {
             ArrayList<Object> camposUsuario = (ArrayList<Object>) o;
 
             String nombre = (String) camposUsuario.get(0);
-            //String estado = (String) camposUsuario.get(1);
 
             for (HiloCliente cliente : Server.getListaClientes()) {
 
                 try {
 
-                    System.out.println("Cliente lista: " + cliente.getUsuario().getNombre());
-                    System.out.println("Amigo: " + nombre);
-
+                    //Comprueba que el cliente esté conectado. Si lo está, añade el campo Conectado al listado
                     if (cliente.getUsuario().getNombre().equals(nombre)) {
                         camposUsuario.add("Conectado");
                         break;
@@ -1910,10 +2105,12 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
         }
 
+        //Combina la lista de solicitudes recibidas y la lista de amigos
         ArrayList<Object> listaCombinada = new ArrayList<>();
         listaCombinada.addAll(solicitudes);
         listaCombinada.addAll(amigos);
 
+        //Envía el mensaje al cliente remoto
         try {
 
             Message message = new Message("USUARIO", "GET_AMIGOS", listaCombinada);
@@ -1924,12 +2121,16 @@ public class HiloCliente implements Runnable, ObservadorSesion {
         }
     }
 
-    public void enviarInvitacion(String remitente, String establecimiento, boolean exito) {
+    /**
+     * Envía la invitación a un cliente para unirse a un pedido
+     * @param remitente El usuario invitado
+     * @param establecimiento El establecimiento al que se le invita
+     */
+    public void enviarInvitacion(String remitente, String establecimiento) {
 
         ArrayList<Object> data = new ArrayList<>();
         data.add(remitente);
         data.add(establecimiento);
-        data.add(exito);
 
         Message mensaje = new Message("PEDIDO", "RESPUESTA_INVITACION", data);
         try {
@@ -1940,7 +2141,10 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
-    @Override
+    /**
+     * Envía al cliente remoto el listado actualizado de líneas de pedido
+     * @param lineasPedido La lista de líneas de pedido
+     */
     public void actualizarPedidos(ArrayList<Object> lineasPedido) {
 
         Message mensaje = new Message("PEDIDO", "NOTIFICAR_PEDIDOS", lineasPedido);
@@ -1952,7 +2156,11 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
-    //Notifica a los trabajadores del establecimiento dado con las lineas de pedido nuevas
+    /**
+     * Notifica a los trabajadores del establecimiento dado con las lineas de pedido nuevas
+     * @param establecimiento El establecimiento del trabajador
+     * @param lineasPedido El listado de líneas de pedido nuevas
+     */
     public void notificarTrabajadores(Establecimiento establecimiento, ArrayList<Object> lineasPedido) {
 
         for (HiloCliente cliente : Server.getListaClientes()) {
@@ -1966,8 +2174,7 @@ public class HiloCliente implements Runnable, ObservadorSesion {
             if (listaRoles.contains("trabajador")
                     && cliente.getEstablecimientoActual().getNombre().equals(establecimiento.getNombre())) {
 
-                System.out.println("Trabajador: " + cliente.getUsuario().getNombre());
-                System.out.println("Pedidos: " + lineasPedido.size());
+                
                 cliente.enviarPedidosNuevos(lineasPedido);
 
             }
@@ -1976,18 +2183,25 @@ public class HiloCliente implements Runnable, ObservadorSesion {
 
     }
 
+    /**
+     * Envía las líneas de pedido al cliente remoto (trabajador)
+     * @param lineasPedido El listado de líneas de pedido a enviar
+     */
     public void enviarPedidosNuevos(ArrayList<Object> lineasPedido) {
 
         Message mensaje = new Message("PEDIDO", "GET_PEDIDOS_NUEVOS", lineasPedido);
         try {
             out.writeObject(mensaje);
-            System.out.println("Enviado");
         } catch (IOException ex) {
             Logger.getLogger(HiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
+    /**
+     * Notifica a los trabajadores con las líneas de pedido de la BDD
+     * @param establecimiento El establecimiento de los trabajadores a notificar
+     */
     public void notificarPedidosTrabajadoresBDD(Establecimiento establecimiento) {
 
         for (HiloCliente cliente : Server.getListaClientes()) {
@@ -1998,30 +2212,35 @@ public class HiloCliente implements Runnable, ObservadorSesion {
                     listaRoles.add(r.getNombre());
                 }
 
-                //Comprueba que su rol sea trabajador y su establecimiento sea el del pedido
-                if (listaRoles.contains("trabajador")
-                        && cliente.getEstablecimientoActual().getNombre().equals(establecimiento.getNombre())) {
+                try{
+                    //Comprueba que su rol sea trabajador y su establecimiento sea el del pedido
+                    if (listaRoles.contains("trabajador")
+                            && cliente.getEstablecimientoActual().getNombre().equals(establecimiento.getNombre())) {
 
-                    System.out.println("Trabajador:" + cliente.getUsuario().getNombre());
 
-                    ArrayList<Object> lineas = conexion.getLineasEstablecimiento(establecimiento, "DISPONIBLES");
-                    System.out.println("TOTAL LINEAS:" + lineas.size());
-                    System.out.println(lineas);
-                    cliente.enviarPedidosNuevos(lineas);
+                        ArrayList<Object> lineas = conexion.getLineasEstablecimiento(establecimiento, "DISPONIBLES");
+                        cliente.enviarPedidosNuevos(lineas);
 
+                    }
+                }catch(NullPointerException ex){
+                    
                 }
+                
+                
             }
 
         }
 
     }
 
+    /**
+     * Sale de la sesión actual
+     */
     public void salirSesion() {
 
         Message mensaje = new Message("PEDIDO", "SALIR_SESION", new ArrayList<>());
         try {
             out.writeObject(mensaje);
-            System.out.println("Enviado");
         } catch (IOException ex) {
             Logger.getLogger(HiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }

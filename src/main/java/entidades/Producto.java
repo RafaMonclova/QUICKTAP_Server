@@ -17,30 +17,41 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+/**
+ * Clase para mapear la tabla producto
+ * @author rafam
+ */
 @Entity
 @Table(name = "producto")
 public class Producto  implements Serializable {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    //private Establecimiento establecimiento;
+    
+    //Columna nombre
     @Column(name = "nombre")
     private String nombre;
     
+    //Columna descripción
     @Column(name = "descripcion")
     private String descripcion;
     
+    //Columna precio
     @Column(name = "precio")
     private double precio;
     
+    //Columna imagen
     @Column(name = "imagen")
     private byte[] imagen;
     
+    //Columna stock
     @Column(name = "stock")
     private int stock;
     
+    //Relación many to many con categoría
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "producto_categoria",
@@ -48,10 +59,12 @@ public class Producto  implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "id_categoria"))
     private Set<Categoria> categorias = new HashSet();
     
+    //Relación many to one con establecimiento
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
     private Establecimiento establecimiento;
 
+    //Constructores
     public Producto() {
     }
 
@@ -64,7 +77,7 @@ public class Producto  implements Serializable {
         this.stock = stock;
     }
     
-   
+    //Getters y setters
     public int getId() {
         return this.id;
     }

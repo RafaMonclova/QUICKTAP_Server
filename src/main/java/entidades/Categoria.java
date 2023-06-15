@@ -15,29 +15,39 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+/**
+ * Clase para mapear la tabla categoría
+ * @author rafam
+ */
 @Entity
 @Table(name = "categoria")
 public class Categoria  implements Serializable {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     
+    //Columna nombre
     @Column(name = "nombre")
     private String nombre;
     
+    //Columna descripción
     @Column(name = "descripcion")
     private String descripcion;
     
+    //Relación many to one con establecimiento
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
     private Establecimiento establecimiento;
     
+    //Relación many to many con producto
     @ManyToMany(mappedBy = "categorias")
     private Set<Producto> productos;
      
 
+    //Constructores
     public Categoria() {
     }
 
@@ -48,6 +58,7 @@ public class Categoria  implements Serializable {
     }
 
    
+    //Getters y setters
     public int getId() {
         return this.id;
     }

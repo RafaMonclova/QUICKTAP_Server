@@ -23,41 +23,53 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ * Clase para mapear la tabla pedido
+ * @author rafam
+ */
 @Entity
 @Table(name = "pedido")
 public class Pedido  implements Serializable {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     
+    //Columna fecha
     @Column(name = "fecha")
     @Temporal(TemporalType.DATE)
     private Date fecha;
     
+    //Relación many to one con usuario (cliente)
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Usuario clientePide;
     
+    //Relación many to one con usuario (trabajador)
     @ManyToOne
     @JoinColumn(name = "id_trabajador")
     private Usuario trabajadorPrepara;
     
+    //Relación many to many con usuario (clientes participantes)
     @ManyToMany
     @JoinTable(name = "participa_pedido",
         joinColumns = @JoinColumn(name = "id_pedido"),
         inverseJoinColumns = @JoinColumn(name = "id_cliente"))
     private Set<Usuario> participantes = new HashSet();
     
+    //Relación many to one con establecimiento
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
     private Establecimiento establecimiento;
     
+    //Relación one to many con linea_pedido
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LineaPedido> lineasPedido = new HashSet();
      
-
+    
+    //Constructores
     public Pedido() {
     }
 
@@ -68,6 +80,7 @@ public class Pedido  implements Serializable {
 
     }
    
+    //Getters y setters
     public int getId() {
         return this.id;
     }

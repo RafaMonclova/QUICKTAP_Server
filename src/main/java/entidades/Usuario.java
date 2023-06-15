@@ -18,24 +18,33 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
+/**
+ * Clase para mapear la tabla usuario
+ * @author rafam
+ */
 @Entity
 @Table(name = "usuario")
 public class Usuario implements Serializable {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
+    //Columna nombre
     @Column(name = "nombre")
     private String nombre;
 
+    //Columna correo
     @Column(name = "correo", unique = true)
     private String correo;
 
+    //Columna contraseña
     @Column(name = "passw")
     private String passw;
 
+    //Relación many to many con rol
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_rol",
@@ -43,6 +52,7 @@ public class Usuario implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "id_rol"))
     private Set<Rol> rols = new HashSet();
     
+    //Relación many to many con establecimiento. Solo se mapea si el rol es propietario o administrador
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "trabajador_establecimiento",
@@ -50,16 +60,16 @@ public class Usuario implements Serializable {
         "JOIN usuario_rol ur ON ue.id_trabajador = ur.id_usuario " +
         "WHERE ur.id_rol = 2 OR ur.id_rol = 3"),
         inverseJoinColumns = @JoinColumn(name = "id_establecimiento")
-        // Consulta personalizada con condición basada en el rol del usuario
+        //Consulta con condición basada en el rol del usuario
             
     )
     private Set<Establecimiento> establecimientos = new HashSet();
     
-    
+    //Relación one to many con amistades
     @OneToMany(mappedBy = "usuario",orphanRemoval = true,fetch = FetchType.EAGER)
     private Set<Amistad> amigos = new HashSet();
     
-
+    //Constructores
     public Usuario() {
     }
 
@@ -69,6 +79,7 @@ public class Usuario implements Serializable {
         this.passw = passw;
     }
 
+    //Getters y setters
     public int getId() {
         return this.id;
     }

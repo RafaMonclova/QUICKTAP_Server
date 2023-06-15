@@ -13,26 +13,35 @@ import java.util.Objects;
 import javax.persistence.*;
 import javax.persistence.*;
 
+/**
+ * Clase para mapear la tabla amistades
+ * @author rafam
+ */
 @Entity
 @Table(name = "amistades")
 public class Amistad {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
+    //Relación many to one con usuario (usuario)
     @ManyToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    //Relación many to one con usuario (amigo)
     @ManyToOne
     @JoinColumn(name = "id_amigo")
     private Usuario amigo;
 
+    //Columna estado
     @Column(name = "estado")
     private String estado;
     
+    //Constructores
     public Amistad(){
         
     }
@@ -43,6 +52,7 @@ public class Amistad {
         this.estado = estado;
     }
 
+    //Getters y setters
     public int getId() {
         return id;
     }

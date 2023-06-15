@@ -13,31 +13,34 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+/**
+ * Clase para mapear la tabla rol
+ * @author rafam
+ */
 @Entity
 @Table(name = "rol")
 public class Rol  implements Serializable {
 
+    //Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     
+    //Columna nombre
     @Column(name = "nombre")
     private String nombre;
-     //private Set usuarios = new HashSet(0);
-
-//    @ManyToMany(mappedBy = "rols")
-//    private Set<Usuario> usuarios = new HashSet<>();
     
+    
+    //Constructores
     public Rol() {
     }
 
-	
     public Rol(String nombre) {
         this.nombre = nombre;
     }
     
-   
+    //Getters y setters
     public int getId() {
         return this.id;
     }
@@ -56,14 +59,7 @@ public class Rol  implements Serializable {
     public String toString(){
         return nombre;
     }
-//
-//    public Set<Usuario> getUsuarios() {
-//        return usuarios;
-//    }
-//
-//    public void setUsuarios(Set<Usuario> usuarios) {
-//        this.usuarios = usuarios;
-//    }
+
 
     
 
