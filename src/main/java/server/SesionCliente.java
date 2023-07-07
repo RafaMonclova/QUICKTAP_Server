@@ -180,7 +180,6 @@ public class SesionCliente {
         for (LineaPedido lp : lineaDePedido) {
             lp.setId(new LineaPedidoId(contadorId,pedidoSesion.getId())); //Clave compuesta, con contador y el id del pedido
             lineasDePedido.add(lp);
-            System.out.println(lp.getCliente().getNombre() + " - " + lp.getProducto().getNombre());
             contadorId++;
         }
         notificarPedidos();
@@ -193,7 +192,7 @@ public class SesionCliente {
      */
     public synchronized void eliminarLineaPedido(LineaPedido lineaPedido){
         
-        System.out.println(lineasDePedido.size());
+        
         
         for(LineaPedido linea : lineasDePedido){
             
